@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curso 56 · Schoenstatt</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#ffffff;--bg-secondary:#f5f5f3;--bg-tertiary:#efefec;
+  --text-primary:#1a1a18;--text-secondary:#666660;
+  --border:rgba(0,0,0,0.12);--border-md:rgba(0,0,0,0.2);
+  --radius-md:8px;--radius-lg:12px;
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-dark:#3C3489;--purple-text:#26215C;
+  --green-light:#EAF3DE;--green:#3B6D11;
+  --amber-light:#FAEEDA;--amber:#854F0B;
+  --red-light:#FCEBEB;--red:#A32D2D;
+  --teal-light:#E1F5EE;--teal:#0F6E56;
+}
+[data-theme="dark"]{
+  --bg-primary:#1e1e1c;--bg-secondary:#2a2a27;--bg-tertiary:#141412;
+  --text-primary:#f0efe8;--text-secondary:#999990;
+  --border:rgba(255,255,255,0.1);--border-md:rgba(255,255,255,0.2);
+  --purple-light:#26215C;--purple-text:#CECBF6;
+  --green-light:#173404;--green:#C0DD97;
+  --amber-light:#412402;--amber:#FAC775;
+  --red-light:#501313;--red:#F7C1C1;
+  --teal-light:#04342C;--teal:#5DCAA5;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-tertiary);min-height:100vh;color:var(--text-primary)}
+.app{max-width:480px;margin:0 auto;background:var(--bg-tertiary);min-height:100vh;padding-bottom:72px}
+.topbar{background:var(--bg-primary);border-bottom:0.5px solid var(--border);padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:16px;font-weight:500}
+.topbar-sub{font-size:12px;color:var(--text-secondary);margin-top:1px}
+.chip{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg-secondary);color:var(--text-secondary);margin-left:4px}
+.theme-btn{background:none;border:0.5px solid var(--border-md);border-radius:6px;cursor:pointer;color:var(--text-secondary);padding:4px 6px;font-size:14px;display:flex;align-items:center;line-height:1}
+.sync-indicator{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-left:6px;transition:background 0.3s}
+.sync-indicator.syncing{background:#FAC775;animation:pulse 1s infinite}
+.sync-indicator.ok{background:#3B6D11}
+.sync-indicator.error{background:#A32D2D}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.navbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg-primary);border-top:0.5px solid var(--border);display:flex;z-index:100;overflow-x:auto;scrollbar-width:none}
+.navbar::-webkit-scrollbar{display:none}
+.nav-item{flex:0 0 calc(100%/6);display:flex;flex-direction:column;align-items:center;padding:6px 2px 5px;cursor:pointer;gap:2px;border:none;background:none;color:var(--text-secondary);font-size:9px;font-family:inherit}
+.nav-item.active{color:var(--purple)}
+.nav-item i{font-size:20px}
+.page{display:none;padding:12px}
+.page.active{display:block}
+.card{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1rem 1.25rem;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-title i{font-size:16px;color:var(--purple)}
+.metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.metric{background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px;text-align:center}
+.metric-val{font-size:22px;font-weight:500}
+.metric-lbl{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--radius-md);font-weight:500}
+.badge-green{background:var(--green-light);color:var(--green)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.row:last-child{border-bottom:none}
+.row-left{display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.av-p{background:var(--purple-light);color:var(--purple-text)}
+.av-g{background:var(--green-light);color:var(--green)}
+.av-a{background:var(--amber-light);color:var(--amber)}
+.av-t{background:var(--teal-light);color:var(--teal)}
+.row-name{font-size:13px;font-weight:500}
+.row-sub{font-size:11px;color:var(--text-secondary);margin-top:1px}
+.progress-bar{height:6px;background:var(--bg-secondary);border-radius:3px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;background:var(--purple);border-radius:3px}
+.section-title{font-size:11px;font-weight:500;color:var(--text-secondary);margin:14px 0 6px;letter-spacing:0.05em;text-transform:uppercase}
+.meeting-item{background:var(--bg-primary);border-radius:var(--radius-md);border:0.5px solid var(--border);margin-bottom:6px;overflow:hidden}
+.meeting-header{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.meeting-day{font-size:20px;font-weight:500;color:var(--purple);line-height:1}
+.meeting-month{font-size:10px;color:var(--text-secondary);text-transform:uppercase}
+.meeting-title{font-size:13px;font-weight:500}
+.meeting-desc{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.meeting-body{display:none;border-top:0.5px solid var(--border);padding:10px 12px}
+.meeting-body.open{display:block}
+.pasadas-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0;margin-bottom:4px}
+.pasadas-toggle-label{font-size:11px;font-weight:500;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase}
+.pasadas-body{display:none}
+.pasadas-body.open{display:block}
+.attendee-chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin:2px}
+.attendee-chip.present{background:var(--green-light);color:var(--green)}
+.attendee-chip.absent{background:var(--red-light);color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-md);border:0.5px solid var(--border-md);background:transparent;color:var(--text-primary);font-size:13px;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--bg-secondary)}
+.btn-primary{background:var(--purple);color:#EEEDFE;border-color:var(--purple)}
+.btn-primary:hover{background:var(--purple-dark)}
+.btn-sm{padding:4px 8px;font-size:11px}
+.delete-btn{background:none;border:none;cursor:pointer;color:var(--text-secondary);padding:4px;font-size:16px}
+.delete-btn:hover{color:var(--red)}
+.gcal-btn{background:none;border:0.5px solid rgba(66,133,244,0.35);border-radius:6px;cursor:pointer;padding:4px 5px;display:inline-flex;align-items:center;justify-content:center}
+.gcal-btn:hover{background:rgba(66,133,244,0.08)}
+.fin-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border)}
+.fin-row:last-child{border-bottom:none}
+.fin-amount{font-size:13px;font-weight:500}
+.fin-pos{color:var(--green)}
+.fin-neg{color:var(--red)}
+.tab-bar{display:flex;gap:4px;background:var(--bg-secondary);border-radius:var(--radius-md);padding:3px;margin-bottom:12px}
+.tab-btn{flex:1;padding:6px;border:none;background:none;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text-secondary);font-family:inherit}
+.tab-btn.active{background:var(--bg-primary);color:var(--text-primary);font-weight:500}
+.saldo-box{background:var(--purple);border-radius:var(--radius-lg);padding:20px;margin-bottom:12px;color:#EEEDFE;text-align:center}
+.saldo-box .s-lbl{font-size:12px;opacity:0.8}
+.saldo-box .s-val{font-size:36px;font-weight:500;margin-top:4px}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+.gallery-item{aspect-ratio:1;background:var(--bg-secondary);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;border:0.5px solid var(--border);overflow:hidden;cursor:pointer;flex-direction:column;gap:4px;background-size:cover;background-position:center;position:relative}
+.gallery-item i{font-size:28px;color:var(--text-secondary)}
+.gallery-label{font-size:10px;color:var(--text-secondary)}
+.material-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.material-item:last-child{border-bottom:none}
+.material-icon{width:36px;height:36px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.mat-vid{background:var(--red-light);color:var(--red)}
+.mat-can{background:var(--teal-light);color:var(--teal)}
+.mat-pdf{background:var(--amber-light);color:var(--amber)}
+.mat-ppt{background:var(--purple-light);color:var(--purple-text)}
+.efem-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.efem-item:last-child{border-bottom:none}
+.efem-days{min-width:36px;text-align:center}
+.efem-days-num{font-size:18px;font-weight:500;color:var(--purple);line-height:1}
+.efem-days-lbl{font-size:9px;color:var(--text-secondary);text-transform:uppercase}
+.efem-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fam-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:4px}
+.fam-tile{background:var(--bg-primary);border-radius:var(--radius-lg);border:0.5px solid var(--border);overflow:hidden;cursor:pointer;position:relative}
+.fam-tile-img{width:100%;aspect-ratio:1;background:var(--bg-secondary);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center}
+.fam-tile-img i{font-size:36px;color:var(--text-secondary)}
+.fam-tile-body{padding:8px 10px 10px}
+.fam-tile-name{font-size:13px;font-weight:500}
+.fam-tile-sub{font-size:11px;color:var(--text-secondary);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fam-tile-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.45);border:none;border-radius:6px;cursor:pointer;padding:3px;display:flex;color:white;font-size:13px}
+.fam-card-body{display:none;border-top:0.5px solid var(--border)}
+.fam-card-body.open{display:block}
+.fam-detail-row{display:flex;align-items:flex-start;gap:8px;padding:6px 14px;border-bottom:0.5px solid var(--border)}
+.fam-detail-row:last-child{border-bottom:none}
+.fam-detail-label{font-size:11px;color:var(--text-secondary);min-width:90px;padding-top:1px}
+.fam-detail-val{font-size:13px}
+.members-section{padding:10px 14px}
+.member-card{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--border)}
+.member-card:last-child{border-bottom:none}
+.member-photo{width:38px;height:38px;border-radius:50%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.bday-box{display:flex;align-items:center;gap:8px;background:var(--purple-light);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:8px}
+.bday-box i{color:var(--purple);font-size:18px}
+.bday-box span{font-size:13px;color:var(--purple-text)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-sheet{background:var(--bg-primary);border-radius:20px 20px 0 0;padding:20px 16px 36px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-header{font-size:15px;font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-sheet input,.modal-sheet select,.modal-sheet textarea{width:100%;margin-bottom:8px;padding:9px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:13px;font-family:inherit}
+.modal-sheet input:focus,.modal-sheet select:focus,.modal-sheet textarea:focus{outline:none;border-color:var(--purple)}
+.modal-label{font-size:11px;color:var(--text-secondary);margin:6px 0 4px}
+.asist-dot{width:28px;height:28px;border-radius:6px;border:none;cursor:pointer;font-size:10px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.ad-yes{background:var(--green-light);color:var(--green)}
+.ad-no{background:var(--red-light);color:var(--red)}
+.ad-nd{background:var(--bg-secondary);color:var(--text-secondary)}
+.img-picker{width:100%;height:80px;border:1.5px dashed var(--border-md);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;background:var(--bg-secondary);overflow:hidden;position:relative}
+.img-picker:hover{border-color:var(--purple)}
+.img-picker-lg{height:160px}
+.img-picker.has-img{border-style:solid;border-color:var(--border)}
+.img-picker img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Curso 56 <span class="chip">Candidatura</span></div>
+      <div class="topbar-sub">Federación de Familias · Año 2 · 2026–2027</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-indicator" id="sync-dot" title="Estado de sincronización"></span>
+      <button class="theme-btn" onclick="toggleTheme()" title="Modo claro/oscuro"><i class="ti ti-moon" id="theme-icon"></i></button>
+      <i class="ti ti-flame" style="font-size:22px;color:var(--purple)"></i>
+    </div>
+  </div>
+
+  <div class="page active" id="page-home">
+    <div id="familia-semana-card" style="background:var(--purple);border-radius:var(--radius-lg);padding:20px 20px 22px;margin:12px 0 12px;position:relative;overflow:hidden">
+      <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.7);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px">Esta semana rezamos por...</div>
+      <div id="familia-semana-body" style="font-size:13px;color:rgba(255,255,255,0.7)">Cargando...</div>
+    </div>
+    <div id="bday-container"></div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-calendar-event"></i> Próxima reunión</div>
+      <div id="proxima-reunion" style="font-size:13px;color:var(--text-secondary)">Cargando...</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-calendar-star"></i> Efemérides · próximos 30 días</div>
+      <div id="efemerides-list"><div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:8px 0">Cargando...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-sun" style="color:#E8A020"></i> Santo del día</div>
+      <div id="santo-del-dia"><div style="font-size:12px;color:var(--text-secondary)">Cargando...</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-book" style="color:var(--purple)"></i> Evangelio del día</div>
+      <div id="evangelio-del-dia"><div style="font-size:12px;color:var(--text-secondary)">Cargando...</div></div>
+      <div id="evangelio-completo" style="display:none;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)"></div>
+      <button id="evangelio-mas-btn" style="display:none;background:none;border:none;color:var(--purple);font-size:12px;cursor:pointer;margin-top:6px;padding:0;font-family:inherit" onclick="toggleEvangelio()">Leer más ↓</button>
+    </div>
+  </div>
+
+  <div class="page" id="page-cal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px">
+      <div style="font-size:15px;font-weight:500">Reuniones</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-reunion')"><i class="ti ti-plus"></i> Nueva</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px">
+      <div class="metric"><div class="metric-val" id="cal-realizadas">—</div><div class="metric-lbl">Reuniones realizadas</div></div>
+      <div class="metric"><div class="metric-val" id="cal-asistencia">—</div><div class="metric-lbl">Asistencia global</div></div>
+    </div>
+    <div id="meetings-list"></div>
+  </div>
+
+  <div class="page" id="page-familias">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px">
+      <div style="font-size:15px;font-weight:500">Familias del curso</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-familia')"><i class="ti ti-plus"></i> Nueva</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">
+      <div style="background:#534AB7;border-radius:var(--radius-md);padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:500;color:#fff" id="fam-adultos">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px">Adultos</div>
+      </div>
+      <div style="background:#534AB7;border-radius:var(--radius-md);padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:500;color:#fff" id="fam-hijos-total">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px">Hijos en total</div>
+      </div>
+      <div style="background:#3C3489;border-radius:var(--radius-md);padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:500;color:#fff" id="fam-hijos-mayores">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px">Hijos mayores de 18</div>
+      </div>
+      <div style="background:#3C3489;border-radius:var(--radius-md);padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:500;color:#fff" id="fam-hijos-menores">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px">Hijos menores de 18</div>
+      </div>
+    </div>
+    <div id="familias-list"></div>
+    <div class="section-title" style="margin-top:8px">Matrimonio educador</div>
+    <div class="card">
+      <div class="row" style="border:none;padding:4px 0">
+        <div class="row-left"><div class="avatar av-t" style="width:42px;height:42px">BM</div><div><div class="row-name">Bernardo Méndez</div><div class="row-sub">Educador · primeros 4 años</div></div></div>
+      </div>
+      <div class="row" style="border:none;padding:4px 0;margin-top:4px">
+        <div class="row-left"><div class="avatar av-g" style="width:42px;height:42px">CG</div><div><div class="row-name">Claudia Grellet</div><div class="row-sub">Educadora · primeros 4 años</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-fin">
+    <div class="saldo-box"><div class="s-lbl">Caja disponible</div><div class="s-val" id="saldo-val">$0</div></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn" style="flex:1;justify-content:center" onclick="openModal('modal-ingreso')"><i class="ti ti-arrow-down" style="color:var(--green)"></i> Ingreso</button>
+      <button class="btn" style="flex:1;justify-content:center" onclick="openModal('modal-egreso')"><i class="ti ti-arrow-up" style="color:var(--red)"></i> Gasto</button>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setFinTab('todos',this)">Todos</button>
+      <button class="tab-btn" onclick="setFinTab('ingresos',this)">Ingresos</button>
+      <button class="tab-btn" onclick="setFinTab('gastos',this)">Gastos</button>
+    </div>
+    <div class="card"><div id="movimientos-list"></div></div>
+  </div>
+
+  <div class="page" id="page-galeria">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px">
+      <div style="font-size:15px;font-weight:500">Galería de fotos</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-subir-fotos')"><i class="ti ti-upload"></i> Subir fotos</button>
+    </div>
+    <div id="galeria-albums"></div>
+  </div>
+
+  <div class="page" id="page-material">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 10px">
+      <div style="font-size:15px;font-weight:500">Material del curso</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('modal-material')"><i class="ti ti-plus"></i> Agregar</button>
+    </div>
+    <div id="material-list"></div>
+  </div>
+</div>
+
+<nav class="navbar">
+  <button class="nav-item active" onclick="goPage('home',this)"><i class="ti ti-home"></i><span>Inicio</span></button>
+  <button class="nav-item" onclick="goPage('cal',this)"><i class="ti ti-calendar"></i><span>Reuniones</span></button>
+  <button class="nav-item" onclick="goPage('familias',this)"><i class="ti ti-users"></i><span>Familias</span></button>
+  <button class="nav-item" onclick="goPage('fin',this)"><i class="ti ti-wallet"></i><span>Finanzas</span></button>
+  <button class="nav-item" onclick="goPage('galeria',this)"><i class="ti ti-photo"></i><span>Fotos</span></button>
+  <button class="nav-item" onclick="goPage('material',this)"><i class="ti ti-book"></i><span>Material</span></button>
+</nav>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal-sheet" id="modal-reunion" style="display:none">
+    <div class="modal-header">Nueva reunión <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="text" id="r-titulo" placeholder="Título (ej: Reunión Nro 18)">
+    <input type="date" id="r-fecha">
+    <input type="text" id="r-horario" placeholder="Horario (ej: 13:00 hs)">
+    <input type="text" id="r-lugar" placeholder="Lugar">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="addReunion()">Guardar</button>
+  </div>
+  <div class="modal-sheet" id="modal-familia" style="display:none">
+    <div class="modal-header">Nueva familia <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="text" id="f-apellido" placeholder="Apellido de la familia (del papá)">
+    <div class="modal-label">Esposo</div>
+    <input type="text" id="f-esposo" placeholder="Nombre del esposo">
+    <input type="date" id="f-nac1">
+    <div class="modal-label">Esposa</div>
+    <input type="text" id="f-esposa" placeholder="Nombre de la esposa">
+    <input type="date" id="f-nac2">
+    <div class="modal-label">Datos del matrimonio</div>
+    <input type="date" id="f-casamiento">
+    <input type="text" id="f-vivienda" placeholder="Dirección de vivienda">
+    <input type="text" id="f-ideal" placeholder="Ideal matrimonial">
+    <div class="modal-label">Hijos (uno por línea: nombre,YYYY-MM-DD)</div>
+    <textarea id="f-hijos" placeholder="Juan Cruz,2015-01-14&#10;Sofía,2017-05-10" style="resize:none;height:80px"></textarea>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="addFamilia()">Guardar</button>
+  </div>
+  <div class="modal-sheet" id="modal-ingreso" style="display:none">
+    <div class="modal-header">Registrar ingreso <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="text" id="i-desc" placeholder="Descripción (ej: Aporte de familias)">
+    <input type="number" id="i-monto" placeholder="Monto ($)">
+    <input type="date" id="i-fecha">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="addMovimiento('ingreso')">Guardar</button>
+  </div>
+  <div class="modal-sheet" id="modal-egreso" style="display:none">
+    <div class="modal-header">Registrar gasto <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="text" id="e-desc" placeholder="Descripción (ej: Materiales de reunión)">
+    <input type="number" id="e-monto" placeholder="Monto ($)">
+    <input type="date" id="e-fecha">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="addMovimiento('egreso')">Guardar</button>
+  </div>
+  <div class="modal-sheet" id="modal-material" style="display:none">
+    <div class="modal-header">Agregar material <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="text" id="m-titulo" placeholder="Título del material">
+    <select id="m-tipo">
+      <option value="">Tipo de material...</option>
+      <option value="video">Video</option>
+      <option value="cancion">Canción</option>
+      <option value="pdf">PDF</option>
+      <option value="taller">Taller</option>
+    </select>
+    <input type="text" id="m-link" placeholder="Link o URL" oninput="autoDetectTipo(this.value)">
+    <input type="text" id="m-reunion" placeholder="Reunión relacionada (ej: Reunión Nro 11)">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="addMaterial()">Guardar</button>
+  </div>
+  <div class="modal-sheet" id="modal-subir-fotos" style="display:none">
+    <div class="modal-header">Subir fotos <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <div class="modal-label">Álbum / reunión</div>
+    <select id="sf-album">
+      <option value="">Seleccionar reunión...</option>
+    </select>
+    <input type="text" id="sf-album-custom" placeholder="O escribir nombre del álbum" style="margin-bottom:8px">
+    <div class="modal-label">Fotos (podés seleccionar varias)</div>
+    <div id="sf-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:40px"></div>
+    <button class="btn" style="width:100%;justify-content:center;margin-bottom:8px" onclick="document.getElementById('sf-files').click()"><i class="ti ti-photo-plus"></i> Elegir fotos</button>
+    <input type="file" id="sf-files" accept="image/*" multiple style="display:none" onchange="previewFotosSubida(this)">
+    <div id="sf-status" style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;display:none"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="subirFotosLote()"><i class="ti ti-upload"></i> Subir todas</button>
+  </div>
+
+  <div class="modal-sheet" id="modal-visor-foto" style="display:none">
+    <div class="modal-header" id="visor-titulo">Foto <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <img id="visor-img" src="" style="width:100%;border-radius:var(--radius-md);margin-bottom:12px;max-height:60vh;object-fit:contain">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <button class="btn btn-sm" onclick="visorNavegar(-1)"><i class="ti ti-arrow-left"></i></button>
+      <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="eliminarFotoVisor()"><i class="ti ti-trash"></i> Eliminar</button>
+      <button class="btn btn-sm" onclick="visorNavegar(1)"><i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <div class="modal-sheet" id="modal-asistencia" style="display:none">
+    <div class="modal-header" id="asist-modal-title">Asistencia <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <div id="asist-modal-body"></div>
+  </div>
+
+  <div class="modal-sheet" id="modal-editar-reunion" style="display:none">
+    <div class="modal-header">Editar reunión <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="hidden" id="er-id">
+    <input type="text" id="er-titulo" placeholder="Título (ej: Reunión Nro 18)">
+    <input type="text" id="er-subtitulo" placeholder="Subtítulo (opcional)">
+    <input type="date" id="er-fecha">
+    <input type="text" id="er-horario" placeholder="Horario (ej: 13:00 hs)">
+    <input type="text" id="er-lugar" placeholder="Lugar">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="guardarEdicionReunion()">Guardar cambios</button>
+  </div>
+
+  <div class="modal-sheet" id="modal-editar-familia" style="display:none">
+    <div class="modal-header">Editar familia <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="hidden" id="ef-id">
+    <div class="modal-label">Foto de familia</div>
+    <div id="ef-foto-preview" style="width:100%;height:120px;border:1.5px dashed var(--border-md);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;background:var(--bg-secondary);overflow:hidden;position:relative" onclick="document.getElementById('ef-foto-file').click()">
+      <i class="ti ti-camera" style="font-size:28px;color:var(--text-secondary)"></i>
+      <span style="font-size:11px;color:var(--text-secondary);margin-top:4px">Tocar para cambiar foto</span>
+    </div>
+    <input type="file" id="ef-foto-file" accept="image/*" style="display:none" onchange="uploadFotoFamilia(this)">
+    <input type="text" id="ef-apellido" placeholder="Apellido de la familia">
+    <input type="text" id="ef-cargo" placeholder="Cargo (ej: Jefes, Economía)">
+    <div class="modal-label">Esposo</div>
+    <input type="text" id="ef-esposo" placeholder="Nombre del esposo">
+    <input type="date" id="ef-nac1">
+    <div class="modal-label">Foto del esposo</div>
+    <div id="ef-foto1-preview" style="width:100%;height:80px;border:1.5px dashed var(--border-md);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;background:var(--bg-secondary);overflow:hidden;position:relative" onclick="document.getElementById('ef-foto1-file').click()">
+      <i class="ti ti-camera" style="font-size:22px;color:var(--text-secondary)"></i>
+      <span style="font-size:11px;color:var(--text-secondary);margin-top:4px">Foto del esposo</span>
+    </div>
+    <input type="file" id="ef-foto1-file" accept="image/*" style="display:none" onchange="uploadFotoMiembro(this,'esposo')">
+    <div class="modal-label">Esposa</div>
+    <input type="text" id="ef-esposa" placeholder="Nombre de la esposa">
+    <input type="date" id="ef-nac2">
+    <div class="modal-label">Foto de la esposa</div>
+    <div id="ef-foto2-preview" style="width:100%;height:80px;border:1.5px dashed var(--border-md);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:8px;background:var(--bg-secondary);overflow:hidden;position:relative" onclick="document.getElementById('ef-foto2-file').click()">
+      <i class="ti ti-camera" style="font-size:22px;color:var(--text-secondary)"></i>
+      <span style="font-size:11px;color:var(--text-secondary);margin-top:4px">Foto de la esposa</span>
+    </div>
+    <input type="file" id="ef-foto2-file" accept="image/*" style="display:none" onchange="uploadFotoMiembro(this,'esposa')">
+    <div class="modal-label">Datos del matrimonio</div>
+    <input type="date" id="ef-casamiento">
+    <input type="text" id="ef-vivienda" placeholder="Dirección de vivienda">
+    <input type="text" id="ef-ideal" placeholder="Ideal matrimonial">
+    <div class="modal-label">Hijos (uno por línea: nombre,YYYY-MM-DD)</div>
+    <textarea id="ef-hijos" placeholder="Juan Cruz,2015-01-14&#10;Sofía,2017-05-10" style="resize:none;height:80px"></textarea>
+    <div id="ef-upload-status" style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;display:none"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="guardarEdicionFamilia()">Guardar cambios</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://txgxtaecxatjbjkkijlp.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Z3h0YWVjeGF0amJqa2tpamxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTgzMzgsImV4cCI6MjA5NjA3NDMzOH0.AoruPBtm_v5tEujfNzHDrlXRoCmw4htyBsA34WQGpb4';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const MESES_CORTO=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESES_LARGO=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let state={reuniones:[],familias:[],movimientos:[],material:[],fotos:[]};
+let finTab='todos';
+
+function setSyncStatus(s){
+  const dot=document.getElementById('sync-dot');
+  if(!dot)return;
+  dot.className='sync-indicator '+(s==='syncing'?'syncing':s==='ok'?'ok':'error');
+}
+
+// ---- SUPABASE CRUD ----
+async function loadAll(){
+  setSyncStatus('syncing');
+  try{
+    const [r,f,m,mat,fo]=await Promise.all([
+      sb.from('reuniones').select('*').order('fecha'),
+      sb.from('familias').select('*').order('apellido'),
+      sb.from('movimientos').select('*').order('fecha',{ascending:false}),
+      sb.from('material').select('*'),
+      sb.from('fotos').select('*')
+    ]);
+    state.reuniones=(r.data||[]).map(x=>({...x,asistencia:x.asistencia||{}}));
+    state.familias=(f.data||[]).map(x=>({...x,
+      nacEsposo:x.nac_esposo||'',fotoEsposo:x.foto_esposo||'',
+      nacEsposa:x.nac_esposa||'',fotoEsposa:x.foto_esposa||'',
+      hijos:x.hijos||[],cargo:x.cargo||''}));
+    state.movimientos=m.data||[];
+    state.material=mat.data||[];
+    state.fotos=fo.data||[];
+    setSyncStatus('ok');
+    renderAll();
+  }catch(e){
+    setSyncStatus('error');
+    console.error(e);
+  }
+}
+
+async function dbInsert(table,row){
+  setSyncStatus('syncing');
+  const {error}=await sb.from(table).insert(row);
+  if(error){setSyncStatus('error');console.error(error);return false;}
+  setSyncStatus('ok');return true;
+}
+async function dbUpdate(table,id,data){
+  setSyncStatus('syncing');
+  const {error}=await sb.from(table).update(data).eq('id',id);
+  if(error){setSyncStatus('error');console.error(error);return false;}
+  setSyncStatus('ok');return true;
+}
+async function dbDelete(table,id){
+  setSyncStatus('syncing');
+  const {error}=await sb.from(table).delete().eq('id',id);
+  if(error){setSyncStatus('error');console.error(error);return false;}
+  setSyncStatus('ok');return true;
+}
+
+// ---- REALTIME ----
+function subscribeRealtime(){
+  sb.channel('curso56-changes')
+    .on('postgres_changes',{event:'*',schema:'public'},(payload)=>{
+      loadAll();
+    })
+    .subscribe();
+}
+
+// ---- UI ----
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  document.getElementById('theme-icon').className=next==='dark'?'ti ti-sun':'ti ti-moon';
+  localStorage.setItem('curso56_theme',next);
+}
+
+function goPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+function openModal(id){
+  document.getElementById('modal-overlay').classList.add('show');
+  document.querySelectorAll('.modal-sheet').forEach(m=>m.style.display='none');
+  document.getElementById(id).style.display='block';
+  const today=new Date().toISOString().split('T')[0];
+  ['i-fecha','e-fecha'].forEach(f=>{const el=document.getElementById(f);if(el&&!el.value)el.value=today;});
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('show');
+  document.querySelectorAll('.modal-sheet').forEach(m=>m.style.display='none');
+}
+
+function closeModalOutside(e){if(e.target.id==='modal-overlay')closeModal();}
+
+// ---- HELPERS ----
+function calcEdad(nacStr){
+  if(!nacStr)return null;
+  const hoy=new Date(),nac=new Date(nacStr);
+  let edad=hoy.getFullYear()-nac.getFullYear();
+  const m=hoy.getMonth()-nac.getMonth();
+  if(m<0||(m===0&&hoy.getDate()<nac.getDate()))edad--;
+  return edad;
+}
+function formatFecha(str){
+  if(!str)return '';
+  const[y,m,d]=str.split('-');
+  return`${parseInt(d)} de ${MESES_LARGO[parseInt(m)-1]} de ${y}`;
+}
+function diasHasta(mmdd){
+  const hoy=new Date();
+  const[mm,dd]=mmdd.split('-');
+  let t=new Date(hoy.getFullYear(),parseInt(mm)-1,parseInt(dd));
+  if(t<hoy)t=new Date(hoy.getFullYear()+1,parseInt(mm)-1,parseInt(dd));
+  return Math.round((t-hoy)/(1000*60*60*24));
+}
+function mmddFromStr(s){if(!s)return null;const p=s.split('-');return p[1]+'-'+p[2];}
+function getSaldo(){return state.movimientos.reduce((s,m)=>s+(m.tipo==='ingreso'?m.monto:-m.monto),0);}
+function formatMoney(n){return'$'+Math.round(n).toLocaleString('es-AR');}
+function getProxima(){const hoy=new Date().toISOString().split('T')[0];return state.reuniones.find(r=>r.fecha>=hoy)||null;}
+
+function getEfemerides(){
+  const evs=[];
+  state.familias.forEach(f=>{
+    if(f.nacEsposo){const mm=mmddFromStr(f.nacEsposo);const d=diasHasta(mm);if(d<=30){const e=calcEdad(f.nacEsposo);evs.push({tipo:'cumple',nombre:f.esposo+' '+f.apellido,diasHasta:d,extra:e!=null?'Cumple '+(e+(d===0?0:1))+' años':''});}}
+    if(f.nacEsposa){const mm=mmddFromStr(f.nacEsposa);const d=diasHasta(mm);if(d<=30){const e=calcEdad(f.nacEsposa);evs.push({tipo:'cumple',nombre:f.esposa,diasHasta:d,extra:e!=null?'Cumple '+(e+(d===0?0:1))+' años':''});}}
+    (f.hijos||[]).forEach(h=>{if(h.nac){const mm=mmddFromStr(h.nac);const d=diasHasta(mm);if(d<=30){const e=calcEdad(h.nac);evs.push({tipo:'cumple',nombre:h.nombre+' '+f.apellido,diasHasta:d,extra:e!=null?'Cumple '+(e+(d===0?0:1))+' años':''});}}});
+    if(f.casamiento){const mm=mmddFromStr(f.casamiento);const d=diasHasta(mm);if(d<=30){const a=new Date().getFullYear()-parseInt(f.casamiento.split('-')[0])+(d===0?0:1);evs.push({tipo:'aniv',nombre:'Aniversario '+f.apellido,diasHasta:d,extra:a+' años juntos'});}}
+  });
+  return evs.sort((a,b)=>a.diasHasta-b.diasHasta);
+}
+
+// ---- SANTO Y EVANGELIO ----
+let _evangelioCompleto='';
+
+function toggleEvangelio(){
+  const el=document.getElementById('evangelio-completo');
+  const btn=document.getElementById('evangelio-mas-btn');
+  if(!el)return;
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  btn.textContent=open?'Leer menos ↑':'Leer más ↓';
+}
+
+async function loadSantoYEvangelio(){
+  const hoy=new Date();
+  const diasSemana=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const mesesLargo=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaStr=`${diasSemana[hoy.getDay()]} ${hoy.getDate()} de ${mesesLargo[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+  const santoEl=document.getElementById('santo-del-dia');
+  const evangEl=document.getElementById('evangelio-del-dia');
+  const evangCompleto=document.getElementById('evangelio-completo');
+  const evangBtn=document.getElementById('evangelio-mas-btn');
+  if(santoEl)santoEl.innerHTML=`<div style="font-size:12px;color:var(--text-secondary)">${fechaStr}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Cargando...</div>`;
+  if(evangEl)evangEl.innerHTML=`<div style="font-size:12px;color:var(--text-secondary)">Cargando...</div>`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        messages:[{role:'user',content:`Hoy es ${fechaStr}. Dame en formato JSON sin markdown:
+{
+  "santo": "nombre del santo o santos del día según el calendario católico",
+  "evangelio_ref": "referencia del evangelio de la misa de hoy (ej: Mc 12, 18-27)",
+  "evangelio_intro": "primeras 2-3 oraciones del evangelio de hoy",
+  "evangelio_resto": "resto del evangelio de hoy (completo)"
+}
+Solo el JSON, sin texto adicional.`}]
+      })
+    });
+    const data=await resp.json();
+    const txt=data.content&&data.content[0]?data.content[0].text:'';
+    const clean=txt.replace(/\`\`\`json|\`\`\`/g,'').trim();
+    const parsed=JSON.parse(clean);
+    if(santoEl)santoEl.innerHTML=`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">${fechaStr}</div><div style="font-size:13px;font-weight:500;color:var(--text-primary)">${parsed.santo||'—'}</div>`;
+    if(evangEl)evangEl.innerHTML=`<div style="font-size:12px;font-weight:500;color:var(--purple);margin-bottom:6px">${parsed.evangelio_ref||''}</div><div style="font-size:13px;line-height:1.7;font-style:italic">"${parsed.evangelio_intro||''}..."</div>`;
+    if(evangCompleto&&parsed.evangelio_resto){
+      evangCompleto.innerHTML=`<div style="font-size:13px;line-height:1.7;font-style:italic">"...${parsed.evangelio_resto}"</div>`;
+      if(evangBtn)evangBtn.style.display='block';
+    }
+  }catch(e){
+    if(santoEl)santoEl.innerHTML=`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">${fechaStr}</div><div style="font-size:13px;color:var(--text-secondary)">No disponible hoy</div>`;
+    if(evangEl)evangEl.innerHTML=`<div style="font-size:13px;color:var(--text-secondary)">No disponible hoy</div>`;
+  }
+}
+
+// ---- RENDERS ----
+function renderAll(){
+  renderDashboard();
+  renderCalendario();
+  renderFamilias();
+  renderFinanzas();
+  renderMaterial();
+  renderStats();
+  renderGaleria();
+}
+
+function getFamiliaSemana(){
+  if(!state.familias.length)return null;
+  // Rotar cada semana basado en número de semana del año
+  const ahora=new Date();
+  const inicio=new Date(ahora.getFullYear(),0,1);
+  const semana=Math.floor((ahora-inicio)/(7*24*60*60*1000));
+  return state.familias[semana%state.familias.length];
+}
+
+function renderFamiliaSemana(){
+  const f=getFamiliaSemana();
+  const el=document.getElementById('familia-semana-body');
+  if(!el)return;
+  if(!f){el.innerHTML='<span style="color:rgba(255,255,255,0.6)">Cargando familias...</span>';return;}
+  const imgStyle=f.foto?`background-image:url('${f.foto}');background-size:cover;background-position:center;`:'';
+  const initials=(f.apellido||'').slice(0,2).toUpperCase();
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:16px">
+    <div style="width:72px;height:72px;border-radius:var(--radius-lg);${imgStyle}${!f.foto?'background:rgba(255,255,255,0.15);':''};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:500;color:rgba(255,255,255,0.9)">
+      ${f.foto?'':initials}
+    </div>
+    <div>
+      <div style="font-size:20px;font-weight:500;color:#fff;line-height:1.2">Familia ${f.apellido}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:4px">${[f.esposo?f.esposo.split(' ')[0]:'',f.esposa?f.esposa.split(' ')[0]:''].filter(Boolean).join(' & ')}</div>
+      ${f.cargo?`<div style="margin-top:8px"><span style="font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.2);color:#fff">${f.cargo}</span></div>`:''}
+    </div>
+  </div>`;
+}
+
+function renderDashboard(){
+  renderFamiliaSemana();
+  const total=state.familias.length;
+  const hoy=new Date().toISOString().split('T')[0];
+  const bdays=getEfemerides().filter(e=>e.diasHasta===0);
+  document.getElementById('bday-container').innerHTML=bdays.map(b=>`<div class="bday-box"><i class="ti ti-cake"></i><span>¡Hoy: <b>${b.nombre}</b>! 🎉</span></div>`).join('');
+  const prox=getProxima();
+  const proxEl=document.getElementById('proxima-reunion');
+  if(prox){
+    const[y,m,d]=prox.fecha.split('-');
+    proxEl.innerHTML=`<div style="display:flex;align-items:center;gap:14px"><div style="text-align:center;min-width:44px"><div style="font-size:28px;font-weight:500;color:var(--purple);line-height:1">${parseInt(d)}</div><div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase">${MESES_CORTO[parseInt(m)-1]} ${y}</div></div><div><div style="font-size:14px;font-weight:500">${prox.titulo}${prox.subtitulo?' <span style="font-weight:400;color:var(--text-secondary)">· '+prox.subtitulo+'</span>':''}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px"><i class="ti ti-clock" style="font-size:11px"></i> ${prox.horario} · <i class="ti ti-map-pin" style="font-size:11px"></i> ${prox.lugar}</div></div></div>`;
+  } else proxEl.textContent='No hay reuniones próximas';
+  const efems=getEfemerides().filter(e=>e.diasHasta>0);
+  const efEl=document.getElementById('efemerides-list');
+  if(!efems.length){efEl.innerHTML='<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:8px 0">Sin efemérides en los próximos 30 días</div>';return;}
+  efEl.innerHTML=efems.map(e=>{
+    const icono=e.tipo==='aniv'?'🥂':'🎂';
+    const bg=e.tipo==='aniv'?'background:var(--teal-light)':'background:var(--purple-light)';
+    return`<div class="efem-item"><div class="efem-days"><div class="efem-days-num">${e.diasHasta}</div><div class="efem-days-lbl">días</div></div><div class="efem-icon" style="${bg}">${icono}</div><div style="flex:1"><div style="font-size:13px">${e.nombre}</div><div style="font-size:11px;color:var(--text-secondary)">${e.extra}</div></div></div>`;
+  }).join('');
+}
+
+function renderCalendario(){
+  const el=document.getElementById('meetings-list');
+  if(!state.reuniones.length){el.innerHTML='<div style="font-size:13px;color:var(--text-secondary);text-align:center;padding:24px 0">No hay reuniones</div>';return;}
+  const hoy=new Date().toISOString().split('T')[0];
+  const futuras=state.reuniones.filter(r=>r.fecha>=hoy);
+  const pasadas=state.reuniones.filter(r=>r.fecha<hoy).reverse();
+  let html='';
+  if(futuras.length){html+='<div class="section-title">Próximas</div>'+futuras.map(r=>meetingHTML(r,false)).join('');}
+  if(pasadas.length){html+=`<div class="pasadas-toggle" onclick="togglePasadas()"><span class="pasadas-toggle-label">Anteriores (${pasadas.length})</span><i class="ti ti-chevron-down" id="pasadas-chevron" style="font-size:14px;color:var(--text-secondary);transition:transform 0.2s"></i></div><div class="pasadas-body" id="pasadas-body">`+pasadas.map(r=>meetingHTML(r,true)).join('')+'</div>';}
+  el.innerHTML=html;
+}
+
+function togglePasadas(){
+  const el=document.getElementById('pasadas-body');const icon=document.getElementById('pasadas-chevron');
+  if(el){el.classList.toggle('open');icon.style.transform=el.classList.contains('open')?'rotate(180deg)':'rotate(0deg)';}
+}
+
+function gcalIcon(){
+  const day=new Date().getDate();
+  return`<svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="17" rx="2" fill="white" stroke="#dadce0" stroke-width="1.2"/><rect x="3" y="4" width="18" height="6" rx="2" fill="#4285F4"/><rect x="3" y="8" width="18" height="2" fill="#4285F4"/><text x="12" y="19" text-anchor="middle" font-family="Arial" font-size="7" font-weight="bold" fill="#1a73e8">${day}</text><line x1="8" y1="2" x2="8" y2="7" stroke="#4285F4" stroke-width="1.5" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="7" stroke="#4285F4" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+}
+
+function addToCalendar(rid){
+  const r=state.reuniones.find(x=>x.id===rid);if(!r)return;
+  const[y,m,d]=r.fecha.split('-');
+  const h=(r.horario||'13:00').replace(' hs','').split(':');
+  const hh=(h[0]||'13').padStart(2,'0'),mm=(h[1]||'00').padStart(2,'0');
+  const endH=String((parseInt(hh)+2)%24).padStart(2,'0');
+  const start=`${y}${m}${d}T${hh}${mm}00`,end=`${y}${m}${d}T${endH}${mm}00`;
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(r.titulo+(r.subtitulo?' · '+r.subtitulo:'')+' · Curso 56')}&dates=${start}/${end}&location=${encodeURIComponent(r.lugar||'')}&details=Curso+56+Schoenstatt`,'_blank');
+}
+
+function meetingHTML(r,pasada){
+  const[y,m,d]=r.fecha.split('-');
+  const total=state.familias.length;
+  const asist=r.asistencia||{};
+  const pres=Object.values(asist).filter(v=>v===true).length;
+  let bodyContent='';
+  if(pasada&&state.familias.length){
+    const presentes=state.familias.filter(f=>asist[f.id]===true);
+    const ausentes=state.familias.filter(f=>asist[f.id]===false);
+    if(presentes.length)bodyContent+='<div style="font-size:10px;color:var(--green);font-weight:500;margin-bottom:4px;text-transform:uppercase">Presentes</div>'+presentes.map(f=>'<span class="attendee-chip present">'+f.apellido+'</span>').join('');
+    if(ausentes.length)bodyContent+='<div style="font-size:10px;color:var(--red);font-weight:500;margin:8px 0 4px;text-transform:uppercase">Ausentes</div>'+ausentes.map(f=>'<span class="attendee-chip absent">'+f.apellido+'</span>').join('');
+    if(!presentes.length&&!ausentes.length)bodyContent='<span style="font-size:12px;color:var(--text-secondary)">Sin asistencia registrada</span>';
+    bodyContent+='<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--border)"><button class="btn btn-sm" onclick="verFotosReunion('+JSON.stringify(r.titulo)+')"><i class="ti ti-photo"></i> Ver fotos de esta reunión</button></div>';
+  } else if(!pasada&&state.familias.length){
+    bodyContent='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm" onclick="openAsistModal('+r.id+')"><i class="ti ti-check"></i> Marcar asistencia</button><button class="btn btn-sm" onclick="verFotosReunion('+JSON.stringify(r.titulo)+')"><i class="ti ti-photo"></i> Fotos</button></div>';
+  }
+  return`<div class="meeting-item" style="${pasada?'opacity:0.82':''}"><div class="meeting-header" onclick="toggleMeetingBody(${r.id})"><div style="text-align:center;min-width:32px;flex-shrink:0"><div class="meeting-day">${parseInt(d)}</div><div class="meeting-month">${MESES_CORTO[parseInt(m)-1]}</div></div><div style="flex:1;min-width:0"><div class="meeting-title">${r.titulo}${r.subtitulo?` <span style="font-weight:400;color:var(--text-secondary);font-size:11px">· ${r.subtitulo}</span>`:''}</div><div class="meeting-desc"><i class="ti ti-clock" style="font-size:10px"></i> ${r.horario} · <i class="ti ti-map-pin" style="font-size:10px"></i> ${r.lugar}</div>${total?`<div style="margin-top:3px;display:flex;align-items:center;gap:6px"><span class="badge ${pres>=total*0.8?'badge-green':pres>0?'badge-amber':'badge-red'}">${pres}/${total} familias</span>${total>0?`<span style="font-size:11px;color:var(--text-secondary)">${Math.round(pres/total*100)}%</span>`:''}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:4px;align-items:center;flex-shrink:0"><button class="gcal-btn" onclick="event.stopPropagation();addToCalendar(${r.id})" title="Google Calendar">${gcalIcon()}</button><button class="delete-btn" onclick="event.stopPropagation();abrirEdicionReunion(${r.id})" title="Editar"><i class="ti ti-pencil" style="font-size:14px"></i></button><button class="delete-btn" onclick="event.stopPropagation();deleteReunion(${r.id})" title="Eliminar"><i class="ti ti-trash" style="font-size:14px"></i></button></div></div><div class="meeting-body" id="mb-${r.id}">${bodyContent}</div></div>`;
+}
+
+function toggleMeetingBody(id){document.getElementById('mb-'+id)?.classList.toggle('open');}
+
+function openAsistModal(reunionId){openModal('modal-asistencia');renderAsistModal(reunionId);}
+
+function renderAsistModal(reunionId){
+  const r=state.reuniones.find(x=>x.id===reunionId);if(!r)return;
+  document.getElementById('asist-modal-title').innerHTML=`${r.titulo} <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary);margin-left:auto"><i class="ti ti-x" style="font-size:20px"></i></button>`;
+  document.getElementById('asist-modal-body').innerHTML=state.familias.map(f=>{
+    const asist=r.asistencia||{};
+    const v=asist[f.id];const isYes=v===true;const isNo=v===false;
+    return`<div class="fin-row"><span style="font-size:13px">${f.apellido} · <span style="color:var(--text-secondary);font-size:12px">${[f.esposo,f.esposa].filter(Boolean).join(' & ')}</span></span><div style="display:flex;gap:6px"><button class="asist-dot ${isYes?'ad-yes':'ad-nd'}" onclick="toggleAsist(${reunionId},${f.id})">✓</button><button class="asist-dot ${isNo?'ad-no':'ad-nd'}" onclick="toggleAsistNo(${reunionId},${f.id})">✗</button></div></div>`;
+  }).join('');
+}
+
+async function toggleAsist(rid,fid){
+  const r=state.reuniones.find(x=>x.id===rid);if(!r)return;
+  const asist={...r.asistencia||{}};
+  asist[fid]=asist[fid]===true?undefined:true;
+  if(asist[fid]===undefined)delete asist[fid];
+  await dbUpdate('reuniones',rid,{asistencia:asist});
+  r.asistencia=asist;
+  renderAsistModal(rid);renderAll();
+}
+
+async function toggleAsistNo(rid,fid){
+  const r=state.reuniones.find(x=>x.id===rid);if(!r)return;
+  const asist={...r.asistencia||{}};
+  asist[fid]=asist[fid]===false?undefined:false;
+  if(asist[fid]===undefined)delete asist[fid];
+  await dbUpdate('reuniones',rid,{asistencia:asist});
+  r.asistencia=asist;
+  renderAsistModal(rid);renderAll();
+}
+
+function renderStats(){
+  // Stats reuniones
+  const hoy=new Date().toISOString().split('T')[0];
+  const realizadas=state.reuniones.filter(r=>r.fecha<hoy);
+  const totalFam=state.familias.length;
+  const elCal=document.getElementById('cal-realizadas');
+  const elAsist=document.getElementById('cal-asistencia');
+  if(elCal)elCal.textContent=realizadas.length;
+  if(elAsist&&realizadas.length&&totalFam){
+    const totalAsist=realizadas.reduce((s,r)=>s+Object.values(r.asistencia||{}).filter(v=>v===true).length,0);
+    elAsist.textContent=Math.round(totalAsist/(realizadas.length*totalFam)*100)+'%';
+  } else if(elAsist) elAsist.textContent='—';
+  // Stats familias
+  const adultos=state.familias.length*2;
+  const todosHijos=state.familias.reduce((s,f)=>s+(f.hijos||[]).length,0);
+  const mayores=state.familias.reduce((s,f)=>s+(f.hijos||[]).filter(h=>{const e=calcEdad(h.nac);return e!==null&&e>=18;}).length,0);
+  const menores=state.familias.reduce((s,f)=>s+(f.hijos||[]).filter(h=>{const e=calcEdad(h.nac);return e!==null&&e<18;}).length,0);
+  const ea=document.getElementById('fam-adultos');
+  const eh=document.getElementById('fam-hijos-total');
+  const em=document.getElementById('fam-hijos-mayores');
+  const emn=document.getElementById('fam-hijos-menores');
+  if(ea)ea.textContent=adultos;
+  if(eh)eh.textContent=todosHijos;
+  if(em)em.textContent=mayores;
+  if(emn)emn.textContent=menores;
+}
+
+function renderFamilias(){
+  const el=document.getElementById('familias-list');
+  if(!state.familias.length){el.innerHTML='<div style="font-size:13px;color:var(--text-secondary);text-align:center;padding:24px 0">Agregá las familias del curso</div>';return;}
+  el.innerHTML=`<div class="fam-grid">${state.familias.map((f,i)=>{
+    const imgStyle=f.foto?`background-image:url('${f.foto}');`:'';
+    const cantHijos=(f.hijos||[]).length;
+    return`<div class="fam-tile" onclick="openFamDetail(${f.id})"><div class="fam-tile-img" style="${imgStyle}">${f.foto?'':'<i class="ti ti-users"></i>'}</div><div class="fam-tile-body"><div class="fam-tile-name">Familia ${f.apellido}</div><div class="fam-tile-sub">${[f.esposo?f.esposo.split(' ')[0]:'',f.esposa?f.esposa.split(' ')[0]:''].filter(Boolean).join(' & ')||'—'}</div>${f.cargo?`<div style="margin-top:4px"><span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;background:var(--purple-light);color:var(--purple-text)">${f.cargo}</span></div>`:''}</div><button class="fam-tile-del" onclick="event.stopPropagation();deleteFamilia(${f.id})"><i class="ti ti-trash"></i></button></div>`;
+  }).join('')}</div>`;
+}
+
+function famDetailHTML(f){
+  const MESES_A=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const allMembers=[];
+  if(f.esposo)allMembers.push({nombre:f.esposo,nac:f.nacEsposo,foto:f.fotoEsposo,rol:'Esposo'});
+  if(f.esposa)allMembers.push({nombre:f.esposa,nac:f.nacEsposa,foto:f.fotoEsposa,rol:'Esposa'});
+  (f.hijos||[]).forEach(h=>allMembers.push({nombre:h.nombre,nac:h.nac,foto:h.foto||'',rol:'Hijo/a'}));
+  const membersHTML=allMembers.map(p=>{
+    const edad=p.nac?calcEdad(p.nac):null;
+    const nacStr=p.nac?formatFecha(p.nac):'';
+    const avBg=p.rol==='Esposo'?'background:var(--purple-light);color:var(--purple-text)':p.rol==='Esposa'?'background:var(--green-light);color:var(--green)':'background:var(--amber-light);color:var(--amber)';
+    const initP=(p.nombre||'').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const fotoStyle=p.foto?'background-image:url('+JSON.stringify(p.foto)+');background-size:cover':'';
+    return '<div class="member-card">'
+      +'<div class="member-photo" style="'+(p.foto?fotoStyle:avBg)+'">'+(p.foto?'':initP)+'</div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:13px;font-weight:500">'+p.nombre+' <span style="font-size:11px;font-weight:400;color:var(--text-secondary)">'+p.rol+'</span></div>'
+      +(nacStr?'<div style="font-size:11px;color:var(--text-secondary)">'+nacStr+(edad!==null?' · '+edad+' años':'')+'</div>':'')
+      +'</div></div>';
+  }).join('');
+
+  const detalles=[];
+  if(f.cargo)detalles.push({l:'Cargo',v:f.cargo});
+  if(f.casamiento)detalles.push({l:'Casamiento',v:formatFecha(f.casamiento)});
+  if(f.vivienda)detalles.push({l:'Vivienda',v:f.vivienda});
+  if(f.ideal)detalles.push({l:'Ideal',v:f.ideal});
+
+  const reunionesConAsist=state.reuniones.filter(r=>r.asistencia&&(r.asistencia[f.id]===true||r.asistencia[f.id]===false));
+  const totalPresente=state.reuniones.filter(r=>r.asistencia&&r.asistencia[f.id]===true).length;
+  const totalReuniones=reunionesConAsist.length;
+
+  let out='';
+  detalles.forEach(function(d){
+    out+='<div class="fam-detail-row"><span class="fam-detail-label">'+d.l+'</span><span class="fam-detail-val">'+d.v+'</span></div>';
+  });
+  if(totalReuniones>0){
+    out+='<div class="fam-detail-row"><span class="fam-detail-label">Asistencia</span><span class="fam-detail-val">'+totalPresente+'/'+totalReuniones+' ('+Math.round(totalPresente/totalReuniones*100)+'%)</span></div>';
+  }
+  out+='<div class="members-section"><div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Miembros</div>'+(membersHTML||'<div style="font-size:12px;color:var(--text-secondary)">Sin miembros</div>')+'</div>';
+  if(totalReuniones>0){
+    out+='<div class="members-section" style="border-top:0.5px solid var(--border)"><div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Asistencia por reunión</div>';
+    reunionesConAsist.sort(function(a,b){return b.fecha.localeCompare(a.fecha);}).forEach(function(r){
+      const presente=r.asistencia[f.id]===true;
+      const parts=r.fecha.split('-');
+      const dLabel=parseInt(parts[2])+' '+MESES_A[parseInt(parts[1])-1];
+      out+='<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border)">'
+        +'<span style="font-size:12px;color:var(--text-primary)">'+r.titulo+'</span>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +'<span style="font-size:11px;color:var(--text-secondary)">'+dLabel+'</span>'
+        +'<span class="badge '+(presente?'badge-green':'badge-red')+'" style="font-size:10px;padding:1px 6px">'+(presente?'✓':'✗')+'</span>'
+        +'</div></div>';
+    });
+    out+='</div>';
+  }
+  return out;
+}
+
+function openFamDetail(id){
+  const f=state.familias.find(x=>x.id===id);if(!f)return;
+  document.getElementById('modal-overlay').classList.add('show');
+  document.querySelectorAll('.modal-sheet').forEach(m=>m.style.display='none');
+  let dm=document.getElementById('modal-fam-detail');
+  if(!dm){dm=document.createElement('div');dm.className='modal-sheet';dm.id='modal-fam-detail';document.getElementById('modal-overlay').appendChild(dm);}
+  const imgStyle=f.foto?`background-image:url('${f.foto}');background-size:cover;background-position:center;`:'background:var(--bg-secondary)';
+  dm.innerHTML=`<div class="modal-header"><div style="display:flex;align-items:center;gap:10px"><div style="width:44px;height:44px;border-radius:var(--radius-md);${imgStyle};display:flex;align-items:center;justify-content:center;flex-shrink:0">${f.foto?'':'<i class="ti ti-users" style="font-size:20px;color:var(--text-secondary)"></i>'}</div><div><div style="font-size:15px;font-weight:500">Familia ${f.apellido}</div><div style="font-size:12px;color:var(--text-secondary)">${(f.hijos||[]).length} hijo${(f.hijos||[]).length!==1?'s':''}</div></div></div><div style="display:flex;gap:8px;align-items:center"><button onclick="abrirEdicion(${f.id})" style="background:none;border:0.5px solid var(--border-md);border-radius:6px;cursor:pointer;color:var(--text-secondary);padding:4px 8px;font-size:12px;display:flex;align-items:center;gap:4px"><i class="ti ti-pencil" style="font-size:14px"></i> Editar</button><button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div></div>${famDetailHTML(f)}`;
+  dm.style.display='block';
+}
+
+// ---- ACCIONES ----
+async function addReunion(){
+  const titulo=document.getElementById('r-titulo').value.trim();
+  const fecha=document.getElementById('r-fecha').value;
+  const horario=document.getElementById('r-horario').value.trim()||'13:00 hs';
+  const lugar=document.getElementById('r-lugar').value.trim()||'A definir';
+  if(!titulo||!fecha)return alert('Completá título y fecha');
+  const row={id:Date.now(),titulo,subtitulo:'',fecha,horario,lugar,asistencia:{}};
+  const ok=await dbInsert('reuniones',row);
+  if(ok){state.reuniones.push(row);state.reuniones.sort((a,b)=>a.fecha.localeCompare(b.fecha));['r-titulo','r-fecha','r-horario','r-lugar'].forEach(id=>document.getElementById(id).value='');renderCalendario();closeModal();}
+}
+
+async function deleteReunion(id){
+  if(!confirm('¿Eliminar esta reunión?'))return;
+  const ok=await dbDelete('reuniones',id);
+  if(ok){state.reuniones=state.reuniones.filter(r=>r.id!==id);renderCalendario();}
+}
+
+async function addFamilia(){
+  const apellido=document.getElementById('f-apellido').value.trim();
+  const esposo=document.getElementById('f-esposo').value.trim();
+  const nacEsposo=document.getElementById('f-nac1').value;
+  const esposa=document.getElementById('f-esposa').value.trim();
+  const nacEsposa=document.getElementById('f-nac2').value;
+  const casamiento=document.getElementById('f-casamiento').value;
+  const vivienda=document.getElementById('f-vivienda').value.trim();
+  const ideal=document.getElementById('f-ideal').value.trim();
+  const hijosRaw=document.getElementById('f-hijos').value.trim();
+  if(!apellido)return alert('Ingresá el apellido');
+  const hijos=hijosRaw?hijosRaw.split('\n').filter(l=>l.trim()).map(h=>{const p=h.split(',');return{nombre:p[0].trim(),nac:p[1]?p[1].trim():'',foto:''};}):[]; 
+  const row={id:Date.now(),apellido,foto:'',esposo,nac_esposo:nacEsposo,foto_esposo:'',esposa,nac_esposa:nacEsposa,foto_esposa:'',casamiento,vivienda,ideal,hijos};
+  const ok=await dbInsert('familias',row);
+  if(ok){['f-apellido','f-esposo','f-nac1','f-esposa','f-nac2','f-casamiento','f-vivienda','f-ideal','f-hijos'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});await loadAll();closeModal();}
+}
+
+async function deleteFamilia(id){
+  if(!confirm('¿Eliminar esta familia?'))return;
+  const ok=await dbDelete('familias',id);
+  if(ok){state.familias=state.familias.filter(f=>f.id!==id);renderFamilias();}
+}
+
+async function addMovimiento(tipo){
+  const dId=tipo==='ingreso'?'i-desc':'e-desc',mId=tipo==='ingreso'?'i-monto':'e-monto',fId=tipo==='ingreso'?'i-fecha':'e-fecha';
+  const desc=document.getElementById(dId).value.trim();
+  const monto=parseFloat(document.getElementById(mId).value);
+  const fecha=document.getElementById(fId).value;
+  if(!desc||!monto||!fecha)return alert('Completá todos los campos');
+  const row={id:Date.now(),tipo,descripcion:desc,monto,fecha};
+  const ok=await dbInsert('movimientos',row);
+  if(ok){state.movimientos.unshift(row);[dId,mId].forEach(id=>document.getElementById(id).value='');renderFinanzas();closeModal();}
+}
+
+async function deleteMovimiento(id){
+  if(!confirm('¿Eliminar este movimiento?'))return;
+  const ok=await dbDelete('movimientos',id);
+  if(ok){state.movimientos=state.movimientos.filter(m=>m.id!==id);renderFinanzas();}
+}
+
+function autoDetectTipo(url){
+  if(!url)return;const sel=document.getElementById('m-tipo');if(sel.value)return;
+  if(url.includes('youtu'))sel.value='video';
+  else if(url.includes('.pdf'))sel.value='pdf';
+  else if(url.includes('spotify')||url.includes('soundcloud'))sel.value='cancion';
+  else if(url.includes('slides')||url.includes('canva')||url.includes('ppt'))sel.value='taller';
+}
+
+async function addMaterial(){
+  const titulo=document.getElementById('m-titulo').value.trim();
+  let tipo=document.getElementById('m-tipo').value;
+  const link=document.getElementById('m-link').value.trim();
+  const reunion=document.getElementById('m-reunion').value.trim();
+  if(!tipo&&link){if(link.includes('youtu'))tipo='video';else if(link.includes('.pdf'))tipo='pdf';}
+  if(!titulo){document.getElementById('m-titulo').style.borderColor='var(--red)';return;}
+  if(!tipo){document.getElementById('m-tipo').style.borderColor='var(--red)';return;}
+  document.getElementById('m-titulo').style.borderColor='';document.getElementById('m-tipo').style.borderColor='';
+  const row={id:Date.now(),titulo,tipo,link,reunion};
+  const ok=await dbInsert('material',row);
+  if(ok){state.material.push(row);['m-titulo','m-link','m-reunion'].forEach(id=>document.getElementById(id).value='');document.getElementById('m-tipo').value='';renderMaterial();closeModal();}
+}
+
+async function deleteMaterial(id){
+  if(!confirm('¿Eliminar este material?'))return;
+  const ok=await dbDelete('material',id);
+  if(ok){state.material=state.material.filter(m=>m.id!==id);renderMaterial();}
+}
+
+function renderFinanzas(){
+  document.getElementById('saldo-val').textContent=formatMoney(getSaldo());
+  const filtrados=finTab==='todos'?state.movimientos:state.movimientos.filter(m=>m.tipo===(finTab==='ingresos'?'ingreso':'egreso'));
+  const el=document.getElementById('movimientos-list');
+  if(!filtrados.length){el.innerHTML='<div style="font-size:12px;color:var(--text-secondary);text-align:center;padding:12px 0">Sin movimientos</div>';return;}
+  el.innerHTML=filtrados.map(m=>{
+    const[y,mo,d]=m.fecha.split('-');
+    return`<div class="fin-row"><div><div style="font-size:13px">${m.descripcion||m.desc}</div><div style="font-size:11px;color:var(--text-secondary)">${parseInt(d)} ${MESES_CORTO[parseInt(mo)-1]} ${y}</div></div><div style="display:flex;align-items:center;gap:8px"><span class="fin-amount ${m.tipo==='ingreso'?'fin-pos':'fin-neg'}">${m.tipo==='ingreso'?'+':'−'}${formatMoney(m.monto)}</span><button class="delete-btn" onclick="deleteMovimiento(${m.id})"><i class="ti ti-trash"></i></button></div></div>`;
+  }).join('');
+}
+
+function setFinTab(tab,el){finTab=tab;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderFinanzas();}
+
+function renderMaterial(){
+  const el=document.getElementById('material-list');
+  if(!state.material.length){el.innerHTML='<div style="font-size:13px;color:var(--text-secondary);text-align:center;padding:24px 0">Agregá videos, canciones, PDFs y talleres</div>';return;}
+  const iconMap={video:['ti-brand-youtube','mat-vid'],cancion:['ti-music','mat-can'],pdf:['ti-file-type-pdf','mat-pdf'],taller:['ti-presentation','mat-ppt']};
+  const byReunion={};
+  state.material.forEach(m=>{const k=m.reunion||'General';if(!byReunion[k])byReunion[k]=[];byReunion[k].push(m);});
+  const keys=Object.keys(byReunion).sort((a,b)=>{const na=parseInt(a.replace(/\D/g,''))||999;const nb=parseInt(b.replace(/\D/g,''))||999;return na-nb;});
+  el.innerHTML=keys.map((key,idx)=>{
+    const items=byReunion[key];const secId='ms'+idx;
+    return`<div style="margin-bottom:4px"><div onclick="toggleMatSec('${secId}')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-primary);border-radius:var(--radius-md);border:0.5px solid var(--border);cursor:pointer;margin-bottom:4px"><div style="display:flex;align-items:center;gap:8px"><i class="ti ti-folder" style="font-size:16px;color:var(--purple)"></i><span style="font-size:13px;font-weight:500">${key}</span><span style="font-size:11px;color:var(--text-secondary)">${items.length} item${items.length>1?'s':''}</span></div><i class="ti ti-chevron-down" id="chev-${secId}" style="font-size:14px;color:var(--text-secondary);transition:transform 0.2s"></i></div><div id="${secId}" style="display:none"><div class="card" style="margin-bottom:8px">${items.map(m=>{const[ic,cls]=iconMap[m.tipo]||['ti-file','mat-pdf'];const tipoLabel={video:'Video',cancion:'Canción',pdf:'PDF',taller:'Taller'}[m.tipo]||m.tipo;return`<div class="material-item"><div class="material-icon ${cls}"><i class="ti ${ic}"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.titulo}</div><div style="font-size:11px;color:var(--text-secondary)">${tipoLabel}</div></div>${m.link?`<a href="${m.link}" target="_blank" style="color:var(--purple);margin-right:4px"><i class="ti ti-external-link" style="font-size:18px"></i></a>`:''}<button class="delete-btn" onclick="deleteMaterial(${m.id})"><i class="ti ti-trash"></i></button></div>`;}).join('')}</div></div></div>`;
+  }).join('');
+}
+
+function toggleMatSec(id){
+  const el=document.getElementById(id);const chev=document.getElementById('chev-'+id);
+  if(!el)return;const open=el.style.display==='none';el.style.display=open?'block':'none';if(chev)chev.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+}
+
+// ---- EDICIÓN REUNIÓN ----
+function abrirEdicionReunion(id){
+  const r=state.reuniones.find(x=>x.id===id);
+  if(!r)return;
+  document.getElementById('er-id').value=id;
+  document.getElementById('er-titulo').value=r.titulo||'';
+  document.getElementById('er-subtitulo').value=r.subtitulo||'';
+  document.getElementById('er-fecha').value=r.fecha||'';
+  document.getElementById('er-horario').value=r.horario||'';
+  document.getElementById('er-lugar').value=r.lugar||'';
+  openModal('modal-editar-reunion');
+}
+
+async function guardarEdicionReunion(){
+  const id=parseInt(document.getElementById('er-id').value);
+  const titulo=document.getElementById('er-titulo').value.trim();
+  const fecha=document.getElementById('er-fecha').value;
+  if(!titulo||!fecha)return alert('Completá título y fecha');
+  const updates={
+    titulo,
+    subtitulo:document.getElementById('er-subtitulo').value.trim(),
+    fecha,
+    horario:document.getElementById('er-horario').value.trim()||'13:00 hs',
+    lugar:document.getElementById('er-lugar').value.trim()||'A definir',
+  };
+  const ok=await dbUpdate('reuniones',id,updates);
+  if(ok){
+    const r=state.reuniones.find(x=>x.id===id);
+    if(r)Object.assign(r,updates);
+    renderCalendario();
+    closeModal();
+  }
+}
+
+// ---- EDICIÓN FAMILIA ----
+let _editFamId=null;
+let _editFotos={familia:'',esposo:'',esposa:''};
+
+function abrirEdicion(id){
+  const f=state.familias.find(x=>x.id===id);
+  if(!f)return;
+  _editFamId=id;
+  _editFotos={familia:f.foto||'',esposo:f.fotoEsposo||'',esposa:f.fotoEsposa||''};
+  document.getElementById('ef-id').value=id;
+  document.getElementById('ef-apellido').value=f.apellido||'';
+  document.getElementById('ef-cargo').value=f.cargo||'';
+  document.getElementById('ef-esposo').value=f.esposo||'';
+  document.getElementById('ef-nac1').value=f.nacEsposo||'';
+  document.getElementById('ef-esposa').value=f.esposa||'';
+  document.getElementById('ef-nac2').value=f.nacEsposa||'';
+  document.getElementById('ef-casamiento').value=f.casamiento||'';
+  document.getElementById('ef-vivienda').value=f.vivienda||'';
+  document.getElementById('ef-ideal').value=f.ideal||'';
+  document.getElementById('ef-hijos').value=(f.hijos||[]).map(h=>h.nombre+(h.nac?','+h.nac:'')).join('\n');
+  // Preview fotos
+  setPreviewFoto('ef-foto-preview', f.foto, 'ti-camera', 'Tocar para cambiar foto', true);
+  setPreviewFoto('ef-foto1-preview', f.fotoEsposo, 'ti-camera', 'Foto del esposo', false);
+  setPreviewFoto('ef-foto2-preview', f.fotoEsposa, 'ti-camera', 'Foto de la esposa', false);
+  closeModal();
+  setTimeout(()=>openModal('modal-editar-familia'),100);
+}
+
+function setPreviewFoto(previewId, url, icon, label, grande){
+  const el=document.getElementById(previewId);
+  if(!el)return;
+  if(url){
+    el.innerHTML=`<img src="${url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`;
+  } else {
+    el.innerHTML=`<i class="ti ${icon}" style="font-size:${grande?28:22}px;color:var(--text-secondary)"></i><span style="font-size:11px;color:var(--text-secondary);margin-top:4px">${label}</span>`;
+  }
+}
+
+function compressForUpload(file, maxSize, quality, callback){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      let w=img.width,h=img.height;
+      if(w>maxSize||h>maxSize){if(w>h){h=Math.round(h*maxSize/w);w=maxSize;}else{w=Math.round(w*maxSize/h);h=maxSize;}}
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>callback(blob),`image/jpeg`,quality);
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadFotoFamilia(input){
+  const file=input.files[0];if(!file)return;
+  const status=document.getElementById('ef-upload-status');
+  status.style.display='block';status.textContent='Subiendo foto...';
+  compressForUpload(file,800,0.75,async blob=>{
+    const ext='jpg';
+    const path=`familias/${_editFamId||Date.now()}_familia.${ext}`;
+    const {data,error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+    if(error){status.textContent='Error al subir: '+error.message;return;}
+    const {data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+    _editFotos.familia=urlData.publicUrl;
+    setPreviewFoto('ef-foto-preview',urlData.publicUrl,'ti-camera','Tocar para cambiar foto',true);
+    status.textContent='✓ Foto subida';
+    setTimeout(()=>status.style.display='none',2000);
+  });
+}
+
+async function uploadFotoMiembro(input, quien){
+  const file=input.files[0];if(!file)return;
+  const status=document.getElementById('ef-upload-status');
+  status.style.display='block';status.textContent='Subiendo foto...';
+  compressForUpload(file,600,0.75,async blob=>{
+    const path=`familias/${_editFamId||Date.now()}_${quien}.jpg`;
+    const {data,error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+    if(error){status.textContent='Error al subir: '+error.message;return;}
+    const {data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+    _editFotos[quien]=urlData.publicUrl;
+    const previewId=quien==='esposo'?'ef-foto1-preview':'ef-foto2-preview';
+    const label=quien==='esposo'?'Foto del esposo':'Foto de la esposa';
+    setPreviewFoto(previewId,urlData.publicUrl,'ti-camera',label,false);
+    status.textContent='✓ Foto subida';
+    setTimeout(()=>status.style.display='none',2000);
+  });
+}
+
+async function guardarEdicionFamilia(){
+  const id=parseInt(document.getElementById('ef-id').value);
+  const apellido=document.getElementById('ef-apellido').value.trim();
+  if(!apellido)return alert('Ingresá el apellido');
+  const hijosRaw=document.getElementById('ef-hijos').value.trim();
+  const hijos=hijosRaw?hijosRaw.split('\n').filter(l=>l.trim()).map(h=>{const p=h.split(',');return{nombre:p[0].trim(),nac:p[1]?p[1].trim():'',foto:''};}):[]; 
+  const updates={
+    apellido,
+    cargo:document.getElementById('ef-cargo').value.trim(),
+    esposo:document.getElementById('ef-esposo').value.trim(),
+    nac_esposo:document.getElementById('ef-nac1').value,
+    esposa:document.getElementById('ef-esposa').value.trim(),
+    nac_esposa:document.getElementById('ef-nac2').value,
+    casamiento:document.getElementById('ef-casamiento').value,
+    vivienda:document.getElementById('ef-vivienda').value.trim(),
+    ideal:document.getElementById('ef-ideal').value.trim(),
+    hijos,
+    foto:_editFotos.familia,
+    foto_esposo:_editFotos.esposo,
+    foto_esposa:_editFotos.esposa,
+  };
+  const ok=await dbUpdate('familias',id,updates);
+  if(ok){await loadAll();closeModal();}
+}
+
+// ---- GALERÍA ----
+let _fotosArchivos=[];
+let _visorFotos=[];
+let _visorIdx=0;
+
+function previewFotosSubida(input){
+  const files=Array.from(input.files);
+  _fotosArchivos=files;
+  const prev=document.getElementById('sf-preview');
+  prev.innerHTML=files.map((f,i)=>{
+    const url=URL.createObjectURL(f);
+    return '<img src="'+url+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:0.5px solid var(--border)">';
+  }).join('');
+}
+
+async function subirFotosLote(){
+  const album=document.getElementById('sf-album-custom').value.trim()||document.getElementById('sf-album').value||'General';
+  if(!album){alert('Elegí o escribí un álbum');return;}
+  if(!_fotosArchivos.length){alert('Elegí al menos una foto');return;}
+  const status=document.getElementById('sf-status');
+  status.style.display='block';
+  let subidas=0;
+  for(const file of _fotosArchivos){
+    status.textContent='Subiendo '+( subidas+1)+'/'+_fotosArchivos.length+'...';
+    await new Promise(resolve=>{
+      compressForUpload(file,1200,0.8,async blob=>{
+        const nombre=Date.now()+'_'+Math.random().toString(36).slice(2)+'.jpg';
+        const path='galeria/'+album+'/'+nombre;
+        const {data,error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+        if(!error){
+          const {data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
+          await sb.from('fotos').insert({id:Date.now()+subidas,link:urlData.publicUrl,descripcion:album});
+          subidas++;
+        }
+        resolve();
+      });
+    });
+  }
+  status.textContent='✓ '+subidas+' fotos subidas';
+  _fotosArchivos=[];
+  document.getElementById('sf-files').value='';
+  document.getElementById('sf-preview').innerHTML='';
+  await loadAll();
+  setTimeout(()=>{status.style.display='none';closeModal();},1500);
+}
+
+async function renderGaleria(){
+  const el=document.getElementById('galeria-albums');
+  if(!el)return;
+  // Poblar select de reuniones en modal subir
+  const sel=document.getElementById('sf-album');
+  if(sel){
+    sel.innerHTML='<option value="">Seleccionar reunión...</option>'+state.reuniones.map(r=>'<option value="'+r.titulo+'">'+r.titulo+'</option>').join('');
+  }
+  if(!state.fotos.length){
+    el.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--text-secondary)"><i class="ti ti-photo-off" style="font-size:40px;opacity:0.4"></i><div style="margin-top:8px;font-size:13px">No hay fotos todavía</div></div>';
+    return;
+  }
+  // Agrupar por álbum (descripcion)
+  const albums={};
+  state.fotos.forEach(f=>{const k=f.descripcion||'General';if(!albums[k])albums[k]=[];albums[k].push(f);});
+  el.innerHTML=Object.entries(albums).map(([album,fotos])=>{
+    const grid=fotos.map((f,i)=>'<div style="aspect-ratio:1;background:var(--bg-secondary);border-radius:var(--radius-md);overflow:hidden;cursor:pointer;background-image:url('+JSON.stringify(f.link)+');background-size:cover;background-position:center" onclick="abrirVisor('+JSON.stringify(album)+','+i+')"></div>').join('');
+    return '<div style="margin-bottom:16px">'
+      +'<div style="font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="ti ti-folder" style="color:var(--purple)"></i>'+album+' <span style="font-size:11px;color:var(--text-secondary);font-weight:400">'+fotos.length+' foto'+( fotos.length>1?'s':'')+'</span></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">'+grid+'</div></div>';
+  }).join('');
+}
+
+function verFotosReunion(titulo){
+  goPage('galeria',document.querySelector('.nav-item:nth-child(5)'));
+  renderGaleria();
+  setTimeout(()=>{
+    const albums=document.getElementById('galeria-albums');
+    if(albums){const target=albums.querySelector('[data-album="'+titulo+'"]');if(target)target.scrollIntoView({behavior:'smooth'});}
+  },300);
+}
+
+function abrirVisor(album,idx){
+  const fotosAlbum=state.fotos.filter(f=>(f.descripcion||'General')===album);
+  _visorFotos=fotosAlbum;
+  _visorIdx=idx;
+  mostrarVisor();
+}
+
+function mostrarVisor(){
+  const f=_visorFotos[_visorIdx];
+  if(!f)return;
+  document.getElementById('visor-titulo').innerHTML=(f.descripcion||'Foto')+' ('+(_visorIdx+1)+'/'+_visorFotos.length+') <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary);margin-left:auto"><i class="ti ti-x" style="font-size:20px"></i></button>';
+  document.getElementById('visor-img').src=f.link;
+  openModal('modal-visor-foto');
+}
+
+function visorNavegar(dir){
+  _visorIdx=(_visorIdx+dir+_visorFotos.length)%_visorFotos.length;
+  mostrarVisor();
+}
+
+async function eliminarFotoVisor(){
+  const f=_visorFotos[_visorIdx];
+  if(!f||!confirm('¿Eliminar esta foto?'))return;
+  await sb.from('fotos').delete().eq('id',f.id);
+  state.fotos=state.fotos.filter(x=>x.id!==f.id);
+  _visorFotos=_visorFotos.filter(x=>x.id!==f.id);
+  if(!_visorFotos.length){closeModal();renderGaleria();return;}
+  _visorIdx=Math.min(_visorIdx,_visorFotos.length-1);
+  mostrarVisor();
+  renderGaleria();
+}
+
+// ---- INIT ----
+const t=localStorage.getItem('curso56_theme')||'light';
+document.documentElement.setAttribute('data-theme',t);
+document.getElementById('theme-icon').className=t==='dark'?'ti ti-sun':'ti ti-moon';
+loadAll();
+subscribeRealtime();
+loadSantoYEvangelio();
+</script>
+</body>
+</html>
