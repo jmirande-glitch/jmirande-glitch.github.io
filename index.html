@@ -746,26 +746,32 @@ function famDetailHTML(f){
     f.ideal?{l:'Ideal',v:f.ideal}:null,
   ].filter(Boolean);
   // Asistencia a reuniones
+  const MESES_A=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const reunionesConAsist=state.reuniones.filter(r=>r.asistencia&&(r.asistencia[f.id]===true||r.asistencia[f.id]===false));
-  const asistHTML=reunionesConAsist.length?`<div class="members-section" style="border-top:0.5px solid var(--border)">
-    <div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Asistencia a reuniones</div>
-    ${reunionesConAsist.sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>{
-      const presente=r.asistencia[f.id]===true;
-      const[y,m,d]=r.fecha.split('-');
-      const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-      return\`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--border)">
-        <span style="font-size:12px;color:var(--text-primary)">\${r.titulo}</span>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;color:var(--text-secondary)">\${parseInt(d)} \${MESES[parseInt(m)-1]}</span>
-          <span class="badge \${presente?'badge-green':'badge-red'}" style="font-size:10px;padding:1px 6px">\${presente?'✓ Presente':'✗ Ausente'}</span>
-        </div>
-      </div>\`;
-    }).join('')}
-  </div>`:'';
-  const totalReuniones=state.reuniones.filter(r=>r.asistencia&&(r.asistencia[f.id]===true||r.asistencia[f.id]===false)).length;
+  const totalReuniones=reunionesConAsist.length;
   const totalPresente=state.reuniones.filter(r=>r.asistencia&&r.asistencia[f.id]===true).length;
-  const tasaHTML=totalReuniones>0?`<div class="fam-detail-row"><span class="fam-detail-label">Asistencia</span><span class="fam-detail-val">${totalPresente}/${totalReuniones} reuniones (${Math.round(totalPresente/totalReuniones*100)}%)</span></div>`:'';
-  return\`\${[...detalles].concat(tasaHTML?[{l:'__tasa__',v:''}]:[]).map(d=>d.l==='__tasa__'?tasaHTML:\`<div class="fam-detail-row"><span class="fam-detail-label">\${d.l}</span><span class="fam-detail-val">\${d.v}</span></div>\`).join('')}<div class="members-section"><div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Miembros</div>\${membersHTML||'<div style="font-size:12px;color:var(--text-secondary)">Sin miembros</div>'}</div>\${asistHTML}\`;
+  const tasaHTML=totalReuniones>0?'<div class="fam-detail-row"><span class="fam-detail-label">Asistencia</span><span class="fam-detail-val">'+totalPresente+'/'+totalReuniones+' reuniones ('+Math.round(totalPresente/totalReuniones*100)+'%)</span></div>':'';
+  let asistRows='';
+  reunionesConAsist.sort((a,b)=>b.fecha.localeCompare(a.fecha)).forEach(r=>{
+    const presente=r.asistencia[f.id]===true;
+    const parts=r.fecha.split('-');
+    const dLabel=parseInt(parts[2])+' '+MESES_A[parseInt(parts[1])-1];
+    asistRows+='<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border)">'
+      +'<span style="font-size:12px;color:var(--text-primary)">'+r.titulo+'</span>'
+      +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<span style="font-size:11px;color:var(--text-secondary)">'+dLabel+'</span>'
+      +'<span class="badge '+(presente?'badge-green':'badge-red')+'" style="font-size:10px;padding:1px 6px">'+(presente?'✓':'✗')+'</span>'
+      +'</div></div>';
+  });
+  const asistHTML=totalReuniones>0
+    ?'<div class="members-section" style="border-top:0.5px solid var(--border)"><div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Asistencia</div>'+asistRows+'</div>'
+    :'';
+  let html='';
+  detalles.forEach(d=>{html+='<div class="fam-detail-row"><span class="fam-detail-label">'+d.l+'</span><span class="fam-detail-val">'+d.v+'</span></div>';});
+  html+=tasaHTML;
+  html+='<div class="members-section"><div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Miembros</div>'+(membersHTML||'<div style="font-size:12px;color:var(--text-secondary)">Sin miembros</div>')+'</div>';
+  html+=asistHTML;
+  return html;
 }
 
 function openFamDetail(id){
