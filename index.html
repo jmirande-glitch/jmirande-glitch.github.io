@@ -645,61 +645,6 @@ function toggleEvangelio(){
   btn.textContent=open?'Leer menos ↑':'Leer más ↓';
 }
 
-async function loadSantoYEvangelio(){
-  const hoy=new Date();
-  const diasSemana=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const mesesLargo=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  const fechaStr=diasSemana[hoy.getDay()]+' '+hoy.getDate()+' de '+mesesLargo[hoy.getMonth()];
-  const anio=hoy.getFullYear();
-  const mm=String(hoy.getMonth()+1).padStart(2,'0');
-  const dd=String(hoy.getDate()).padStart(2,'0');
-  const santoEl=document.getElementById('santo-del-dia');
-  const evangEl=document.getElementById('evangelio-del-dia');
-  const evangCompleto=document.getElementById('evangelio-completo');
-  const evangBtn=document.getElementById('evangelio-mas-btn');
-  if(santoEl)santoEl.innerHTML='<div style="font-size:12px;color:var(--text-secondary)">'+fechaStr+'</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Cargando...</div>';
-  if(evangEl)evangEl.innerHTML='<div style="font-size:12px;color:var(--text-secondary)">Cargando...</div>';
-  try{
-    const [rLect,rSanto]=await Promise.all([
-      fetch('https://cpbjr.github.io/catholic-readings-api/readings/'+anio+'/'+mm+'-'+dd+'.json'),
-      fetch('https://cpbjr.github.io/catholic-readings-api/saints/'+anio+'/'+mm+'-'+dd+'.json')
-    ]);
-    const [lectData,santoData]=await Promise.all([rLect.json(),rSanto.json()]);
-    // Santo del día
-    if(santoEl){
-      const nombreSanto=santoData&&santoData.name?santoData.name:(santoData&&santoData.celebration?santoData.celebration:'—');
-      const tipo=santoData&&santoData.type?santoData.type:'';
-      const desc=santoData&&santoData.description?santoData.description:'';
-      santoEl.innerHTML='<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">'+fechaStr+'</div>'
-        +'<div style="font-size:13px;font-weight:500;color:var(--text-primary)">'+nombreSanto+'</div>'
-        +(tipo?'<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">'+tipo+'</div>':'')
-        +(desc?'<div style="font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.5">'+desc.slice(0,150)+(desc.length>150?'...':'')+'</div>':'');
-    }
-    // Evangelio
-    if(lectData&&lectData.readings){
-      const gospelRef=lectData.readings.gospel||'';
-      const season=lectData.season||'';
-      if(evangEl)evangEl.innerHTML='<div style="font-size:12px;font-weight:500;color:var(--purple);margin-bottom:4px">'+gospelRef+'</div>'
-        +(season?'<div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">'+season+'</div>':'')
-        +'<div style="font-size:12px;color:var(--text-secondary);line-height:1.6">Lecturas del día:<br>'
-        +(lectData.readings.firstReading?'• '+lectData.readings.firstReading+'<br>':'')
-        +(lectData.readings.psalm?'• '+lectData.readings.psalm+'<br>':'')
-        +(lectData.readings.secondReading?'• '+lectData.readings.secondReading+'<br>':'')
-        +'• <b>Evangelio: '+gospelRef+'</b></div>'
-        +(lectData.usccbLink?'<a href="'+lectData.usccbLink+'" target="_blank" style="font-size:11px;color:var(--purple);margin-top:6px;display:inline-block">Leer texto completo →</a>':'');
-      if(evangCompleto)evangCompleto.style.display='none';
-      if(evangBtn)evangBtn.style.display='none';
-    } else {
-      if(evangEl)evangEl.innerHTML='<div style="font-size:13px;color:var(--text-secondary)">No disponible hoy</div>';
-    }
-  }catch(e){
-    if(santoEl)santoEl.innerHTML='<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">'+fechaStr+'</div><div style="font-size:13px;color:var(--text-secondary)">No disponible</div>';
-    if(evangEl)evangEl.innerHTML='<div style="font-size:13px;color:var(--text-secondary)">No disponible</div>';
-    console.error('Error cargando lecturas:',e);
-  }
-}
-
-
 
 function toggleEvangelio(){
   const el=document.getElementById('evangelio-completo');
@@ -1292,8 +1237,8 @@ async function renderGaleria(){
     html+='<i class="ti ti-chevron-down" id="chev-'+albumId+'" style="font-size:14px;color:var(--text-secondary);transition:transform 0.2s"></i></div>';
     html+='<div id="'+albumId+'" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">';
     fotos.forEach(function(f,i){
-      const bg=f.link?'background-image:url('+JSON.stringify(f.link)+');background-size:cover;background-position:center':'';
-      html+='<div data-album="'+album.replace(/"/g,'')+'" data-idx="'+i+'" onclick="abrirVisor(this.dataset.album,parseInt(this.dataset.idx))" style="aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden;cursor:pointer;background-color:var(--bg-secondary);'+bg+'"></div>';
+      const imgTag=f.link?'<img src="'+f.link+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">':'';
+      html+='<div data-album="'+album.replace(/"/g,'')+'" data-idx="'+i+'" onclick="abrirVisor(this.dataset.album,parseInt(this.dataset.idx))" style="aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden;cursor:pointer;background-color:var(--bg-secondary);position:relative">'+imgTag+'</div>';
     });
     html+='</div></div>';
   });
