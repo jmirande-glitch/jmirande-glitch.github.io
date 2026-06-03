@@ -1322,6 +1322,111 @@ async function eliminarFotoVisor(){
   renderGaleria();
 }
 
+// ---- EDICIÓN REUNIÓN ----
+function abrirEdicionReunion(id){
+  const r=state.reuniones.find(x=>x.id===id);if(!r)return;
+  document.getElementById('er-id').value=id;
+  document.getElementById('er-titulo').value=r.titulo||'';
+  document.getElementById('er-subtitulo').value=r.subtitulo||'';
+  document.getElementById('er-fecha').value=r.fecha||'';
+  document.getElementById('er-horario').value=r.horario||'';
+  document.getElementById('er-lugar').value=r.lugar||'';
+  openModal('modal-editar-reunion');
+}
+async function guardarEdicionReunion(){
+  const id=parseInt(document.getElementById('er-id').value);
+  const titulo=document.getElementById('er-titulo').value.trim();
+  const fecha=document.getElementById('er-fecha').value;
+  if(!titulo||!fecha)return alert('Completá título y fecha');
+  const updates={titulo,subtitulo:document.getElementById('er-subtitulo').value.trim(),fecha,horario:document.getElementById('er-horario').value.trim()||'13:00 hs',lugar:document.getElementById('er-lugar').value.trim()||'A definir'};
+  const ok=await dbUpdate('reuniones',id,updates);
+  if(ok){const r=state.reuniones.find(x=>x.id===id);if(r)Object.assign(r,updates);renderCalendario();closeModal();}
+}
+
+// ---- EDICIÓN FAMILIA ----
+let _editFamId=null;
+let _editFotos={familia:'',esposo:'',esposa:''};
+function abrirEdicion(id){
+  const f=state.familias.find(x=>x.id===id);if(!f)return;
+  _editFamId=id;
+  _editFotos={familia:f.foto||'',esposo:f.fotoEsposo||'',esposa:f.fotoEsposa||''};
+  document.getElementById('ef-id').value=id;
+  document.getElementById('ef-apellido').value=f.apellido||'';
+  document.getElementById('ef-cargo').value=f.cargo||'';
+  document.getElementById('ef-esposo').value=f.esposo||'';
+  document.getElementById('ef-nac1').value=f.nacEsposo||'';
+  document.getElementById('ef-esposa').value=f.esposa||'';
+  document.getElementById('ef-nac2').value=f.nacEsposa||'';
+  document.getElementById('ef-casamiento').value=f.casamiento||'';
+  document.getElementById('ef-vivienda').value=f.vivienda||'';
+  document.getElementById('ef-ideal').value=f.ideal||'';
+  document.getElementById('ef-hijos').value=(f.hijos||[]).map(h=>h.nombre+(h.nac?','+h.nac:'')).join('\n');
+  setPreviewFoto('ef-foto-preview',f.foto,'ti-camera','Tocar para cambiar foto',true);
+  setPreviewFoto('ef-foto1-preview',f.fotoEsposo,'ti-camera','Foto del esposo',false);
+  setPreviewFoto('ef-foto2-preview',f.fotoEsposa,'ti-camera','Foto de la esposa',false);
+  closeModal();setTimeout(()=>openModal('modal-editar-familia'),100);
+}
+function setPreviewFoto(previewId,url,icon,label,grande){
+  const el=document.getElementById(previewId);if(!el)return;
+  el.innerHTML=url?'<img src="'+url+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'
+    :'<i class="ti '+icon+'" style="font-size:'+(grande?28:22)+'px;color:var(--text-secondary)"></i><span style="font-size:11px;color:var(--text-secondary);margin-top:4px">'+label+'</span>';
+}
+function compressForUpload(file,maxSize,quality,callback){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      let w=img.width,h=img.height;
+      if(w>maxSize||h>maxSize){if(w>h){h=Math.round(h*maxSize/w);w=maxSize;}else{w=Math.round(w*maxSize/h);h=maxSize;}}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>callback(blob),'image/jpeg',quality);
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+async function uploadFotoFamilia(input){
+  const file=input.files[0];if(!file)return;
+  const st=document.getElementById('ef-upload-status');
+  if(st){st.style.display='block';st.textContent='Subiendo foto...';}
+  compressForUpload(file,800,0.75,async blob=>{
+    const path='familias/'+(_editFamId||Date.now())+'_familia.jpg';
+    const {error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+    if(error){if(st)st.textContent='Error: '+error.message;return;}
+    const {data:u}=sb.storage.from('fotos').getPublicUrl(path);
+    _editFotos.familia=u.publicUrl;
+    setPreviewFoto('ef-foto-preview',u.publicUrl,'ti-camera','Tocar para cambiar foto',true);
+    if(st){st.textContent='✓ Foto subida';setTimeout(()=>st.style.display='none',2000);}
+  });
+}
+async function uploadFotoMiembro(input,quien){
+  const file=input.files[0];if(!file)return;
+  const st=document.getElementById('ef-upload-status');
+  if(st){st.style.display='block';st.textContent='Subiendo foto...';}
+  compressForUpload(file,600,0.75,async blob=>{
+    const path='familias/'+(_editFamId||Date.now())+'_'+quien+'.jpg';
+    const {error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
+    if(error){if(st)st.textContent='Error: '+error.message;return;}
+    const {data:u}=sb.storage.from('fotos').getPublicUrl(path);
+    _editFotos[quien]=u.publicUrl;
+    setPreviewFoto(quien==='esposo'?'ef-foto1-preview':'ef-foto2-preview',u.publicUrl,'ti-camera',quien==='esposo'?'Foto del esposo':'Foto de la esposa',false);
+    if(st){st.textContent='✓ Foto subida';setTimeout(()=>st.style.display='none',2000);}
+  });
+}
+async function guardarEdicionFamilia(){
+  const id=parseInt(document.getElementById('ef-id').value);
+  const apellido=document.getElementById('ef-apellido').value.trim();
+  if(!apellido)return alert('Ingresá el apellido');
+  const hijosRaw=document.getElementById('ef-hijos').value.trim();
+  const hijos=hijosRaw?hijosRaw.split('\n').filter(l=>l.trim()).map(h=>{const p=h.split(',');return{nombre:p[0].trim(),nac:p[1]?p[1].trim():'',foto:''};}):[]; 
+  const famActual=state.familias.find(x=>x.id===id)||{};
+  const updates={apellido,cargo:document.getElementById('ef-cargo').value.trim(),esposo:document.getElementById('ef-esposo').value.trim(),nac_esposo:document.getElementById('ef-nac1').value,esposa:document.getElementById('ef-esposa').value.trim(),nac_esposa:document.getElementById('ef-nac2').value,casamiento:document.getElementById('ef-casamiento').value,vivienda:document.getElementById('ef-vivienda').value.trim(),ideal:document.getElementById('ef-ideal').value.trim(),hijos,foto:_editFotos.familia||famActual.foto||'',foto_esposo:_editFotos.esposo||famActual.fotoEsposo||'',foto_esposa:_editFotos.esposa||famActual.fotoEsposa||''};
+  const ok=await dbUpdate('familias',id,updates);
+  if(ok){await loadAll();closeModal();}
+}
+
 // ---- INIT ----
 function toggleOracion(){
   const body=document.getElementById('oracion-body');
