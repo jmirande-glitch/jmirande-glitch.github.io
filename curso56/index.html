@@ -159,6 +159,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bday-box span{font-size:13px;color:var(--purple-text)}
 .bib-filter{flex-shrink:0;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;font-family:inherit;cursor:pointer}
 .bib-filter.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.bib-topico-chip.active{background:var(--purple);color:#fff;border-color:var(--purple)}
 .bib-card{display:flex;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);align-items:flex-start}
 .bib-card:last-child{border-bottom:none}
 .bib-thumb{width:80px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg-secondary)}
@@ -720,13 +721,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div style="padding:0 0 8px">
       <input type="url" id="bib-url" placeholder="URL (YouTube, Spotify, Instagram…)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:8px" oninput="onBibUrlChange()">
       <div id="bib-preview" style="margin-bottom:8px"></div>
-      <input type="text" id="bib-titulo" placeholder="Título (opcional, se detecta automático)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:8px">
-      <select id="bib-topico" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:12px">
-        <option value="">Elegí un tópico</option>
-        <option>Espiritualidad</option><option>Formación</option><option>Familia</option>
-        <option>Misión</option><option>Schoenstatt</option><option>Diálogo</option>
-        <option>Pareja</option><option>Crianza</option><option>Otros</option>
-      </select>
+      <input type="text" id="bib-titulo" placeholder="Título (opcional, se detecta automático)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">Tópicos (podés elegir más de uno)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <button class="bib-topico-chip" data-topico="Espiritualidad" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Espiritualidad</button>
+        <button class="bib-topico-chip" data-topico="Formación" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Formación</button>
+        <button class="bib-topico-chip" data-topico="Familia" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Familia</button>
+        <button class="bib-topico-chip" data-topico="Misión" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Misión</button>
+        <button class="bib-topico-chip" data-topico="Schoenstatt" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Schoenstatt</button>
+        <button class="bib-topico-chip" data-topico="Diálogo" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Diálogo</button>
+        <button class="bib-topico-chip" data-topico="Pareja" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Pareja</button>
+        <button class="bib-topico-chip" data-topico="Crianza" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Crianza</button>
+        <button class="bib-topico-chip" data-topico="Otros" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Otros</button>
+      </div>
       <button onclick="guardarBiblioteca()" style="width:100%;padding:10px;background:var(--purple);color:#fff;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit"><i class="ti ti-device-floppy"></i> Guardar</button>
     </div>
   </div>
@@ -1082,8 +1089,10 @@ async function borrarGasto(idx){
 
 // ---- BIBLIOTECA MULTIMEDIA ----
 var _bibData=[];
-var _bibFiltro='Todos';
+var _bibFiltros=new Set(['Todos']);
 var TOPICOS_BIB=['Espiritualidad','Formación','Familia','Misión','Schoenstatt','Diálogo','Pareja','Crianza','Otros'];
+var COLORES_PLAT={youtube:'#FF0000',spotify:'#1DB954',instagram:'#E1306C',link:'var(--purple)'};
+var ICONOS_PLAT={youtube:'▶',spotify:'♫',instagram:'◈',link:'⊕'};
 
 async function cargarBiblioteca(){
   try{
@@ -1101,30 +1110,44 @@ function renderBibHome(){
     el.innerHTML='<div style="font-size:12px;color:var(--text-secondary)">Todavía no hay contenido en la biblioteca.</div>';
     return;
   }
-  var ultimos=_bibData.slice(0,3);
-  el.innerHTML=ultimos.map(function(item){
+  el.innerHTML=_bibData.slice(0,3).map(function(item){
     var thumb=thumbUrl(item);
+    var topicos=Array.isArray(item.topicos)?item.topicos.join(', '):(item.topico||'');
     var thumbHTML=thumb
-      ?'<img class="bib-thumb" src="'+thumb+'" referrerpolicy="no-referrer" style="width:56px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">'
-      :'<div style="width:56px;height:36px;border-radius:6px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">'+iconoPlataforma(item.plataforma)+'</div>';
-    return '<a href="'+item.url+'" target="_blank" style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);text-decoration:none">'
+      ?'<img src="'+thumb+'" referrerpolicy="no-referrer" style="width:64px;height:42px;border-radius:7px;object-fit:cover;flex-shrink:0">'
+      :'<div style="width:64px;height:42px;border-radius:7px;flex-shrink:0;background:'+COLORES_PLAT[item.plataforma||'link']+';display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff">'+ICONOS_PLAT[item.plataforma||'link']+'</div>';
+    return '<a href="'+item.url+'" target="_blank" style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);text-decoration:none">'
       +thumbHTML
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:11px;color:var(--purple);font-weight:500">'+item.topico+'</div>'
-      +'<div style="font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.titulo+'</div>'
+      +'<div style="font-size:10px;color:var(--purple);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">'+topicos+'</div>'
+      +'<div style="font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.titulo+'</div>'
       +'</div></a>';
-  }).join('')+'<div style="border-bottom:none"></div>';
+  }).join('');
 }
 
-function setBibFilter(topico,btn){
-  _bibFiltro=topico;
-  document.querySelectorAll('.bib-filter').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+function toggleBibFilter(topico,btn){
+  if(topico==='Todos'){
+    _bibFiltros=new Set(['Todos']);
+    document.querySelectorAll('.bib-filter').forEach(b=>{b.classList.toggle('active',b.dataset.topico==='Todos');});
+  } else {
+    _bibFiltros.delete('Todos');
+    document.querySelector('.bib-filter[data-topico="Todos"]').classList.remove('active');
+    if(_bibFiltros.has(topico)){
+      _bibFiltros.delete(topico);
+      btn.classList.remove('active');
+      if(_bibFiltros.size===0){_bibFiltros.add('Todos');document.querySelector('.bib-filter[data-topico="Todos"]').classList.add('active');}
+    } else {
+      _bibFiltros.add(topico);
+      btn.classList.add('active');
+    }
+  }
   renderBiblioteca();
 }
 
+function setBibFilter(topico,btn){toggleBibFilter(topico,btn);}
+
 function detectarPlataforma(url){
-  if(!url)return null;
+  if(!url)return 'link';
   if(/youtube\.com|youtu\.be/.test(url))return 'youtube';
   if(/spotify\.com/.test(url))return 'spotify';
   if(/instagram\.com/.test(url))return 'instagram';
@@ -1137,78 +1160,72 @@ function youtubeId(url){
 }
 
 function thumbUrl(item){
-  if(item.plataforma==='youtube'&&item.ytid){
-    return 'https://img.youtube.com/vi/'+item.ytid+'/mqdefault.jpg';
-  }
+  if(item.plataforma==='youtube'&&item.ytid)return 'https://img.youtube.com/vi/'+item.ytid+'/mqdefault.jpg';
   return null;
-}
-
-function iconoPlataforma(plat){
-  if(plat==='youtube')return '▶️';
-  if(plat==='spotify')return '🎵';
-  if(plat==='instagram')return '📸';
-  return '🔗';
 }
 
 function renderBiblioteca(){
   var el=document.getElementById('biblioteca-list');
   if(!el)return;
-  var items=_bibFiltro==='Todos'?_bibData:_bibData.filter(function(i){return i.topico===_bibFiltro;});
+  var mostrarTodos=_bibFiltros.has('Todos');
+  var items=mostrarTodos?_bibData:_bibData.filter(function(i){
+    var tops=Array.isArray(i.topicos)?i.topicos:[i.topico];
+    return tops.some(function(t){return _bibFiltros.has(t);});
+  });
   if(!items.length){
-    el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--text-secondary);font-size:13px">'
-      +(_bibData.length?'Sin contenido para este tópico':'Todavía no hay contenido. ¡Agregá el primero!')
-      +'</div>';
+    el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--text-secondary);font-size:13px">'+
+      (_bibData.length?'Sin contenido para estos tópicos':'Todavía no hay contenido. ¡Agregá el primero!')+'</div>';
     return;
   }
-  el.innerHTML=items.map(function(item,i){
+  el.innerHTML=items.map(function(item){
     var idx=_bibData.indexOf(item);
     var thumb=thumbUrl(item);
+    var topicos=Array.isArray(item.topicos)?item.topicos.join(' · '):(item.topico||'');
+    var color=COLORES_PLAT[item.plataforma||'link'];
     var thumbHTML=thumb
-      ?'<img class="bib-thumb" src="'+thumb+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
-       +'<div class="bib-thumb-placeholder" style="display:none">'+iconoPlataforma(item.plataforma)+'</div>'
-      :'<div class="bib-thumb-placeholder">'+iconoPlataforma(item.plataforma)+'</div>';
-    return '<div class="bib-card">'
-      +'<a href="'+item.url+'" target="_blank" style="text-decoration:none;display:flex;gap:12px;flex:1;min-width:0">'
-      +thumbHTML
+      ?'<img src="'+thumb+'" referrerpolicy="no-referrer" style="width:110px;height:70px;border-radius:10px;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+       +'<div style="display:none;width:110px;height:70px;border-radius:10px;flex-shrink:0;background:'+color+';align-items:center;justify-content:center;font-size:30px;color:#fff">'+ICONOS_PLAT[item.plataforma||'link']+'</div>'
+      :'<div style="width:110px;height:70px;border-radius:10px;flex-shrink:0;background:'+color+';display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff">'+ICONOS_PLAT[item.plataforma||'link']+'</div>';
+    return '<div style="padding:14px 0;border-bottom:0.5px solid var(--border);display:flex;gap:14px;align-items:flex-start">'
+      +'<a href="'+item.url+'" target="_blank" style="display:contents;text-decoration:none">'+thumbHTML+'</a>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:11px;font-weight:500;color:var(--purple);text-transform:uppercase;margin-bottom:2px">'+item.topico+'</div>'
-      +'<div style="font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+item.titulo+'</div>'
-      +'<div style="font-size:11px;color:var(--text-secondary);margin-top:3px">'+iconoPlataforma(item.plataforma)+' '+item.plataforma.charAt(0).toUpperCase()+item.plataforma.slice(1)+'</div>'
-      +'</div></a>'
-      +'<button onclick="borrarBiblioteca('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--red);padding:4px;align-self:flex-start"><i class="ti ti-trash" style="font-size:14px"></i></button>'
-      +'</div>';
+      +'<div style="font-size:10px;color:'+color+';font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+topicos+'</div>'
+      +'<a href="'+item.url+'" target="_blank" style="text-decoration:none"><div style="font-size:14px;font-weight:600;color:var(--text-primary);line-height:1.35;margin-bottom:6px">'+item.titulo+'</div></a>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between">'
+      +'<span style="font-size:11px;color:var(--text-secondary);font-weight:500">'+item.plataforma.charAt(0).toUpperCase()+item.plataforma.slice(1)+'</span>'
+      +'<button onclick="borrarBiblioteca('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--red);padding:2px"><i class="ti ti-trash" style="font-size:13px"></i></button>'
+      +'</div></div></div>';
   }).join('');
 }
 
 function abrirFormBiblioteca(){
   document.getElementById('bib-url').value='';
   document.getElementById('bib-titulo').value='';
-  document.getElementById('bib-topico').value='';
   document.getElementById('bib-preview').innerHTML='';
+  // Resetear chips de tópicos
+  document.querySelectorAll('.bib-topico-chip').forEach(c=>c.classList.remove('active'));
   openModal('modal-biblioteca');
 }
 
 function onBibUrlChange(){
   var url=document.getElementById('bib-url').value.trim();
   var prev=document.getElementById('bib-preview');
-  var plat=detectarPlataforma(url);
-  if(plat==='youtube'){
+  if(/youtube\.com|youtu\.be/.test(url)){
     var vid=youtubeId(url);
-    if(vid){
-      prev.innerHTML='<img src="https://img.youtube.com/vi/'+vid+'/mqdefault.jpg" referrerpolicy="no-referrer" style="width:100%;border-radius:8px;max-height:120px;object-fit:cover">';
-      return;
-    }
+    if(vid){prev.innerHTML='<img src="https://img.youtube.com/vi/'+vid+'/mqdefault.jpg" referrerpolicy="no-referrer" style="width:100%;border-radius:8px;max-height:110px;object-fit:cover;margin-bottom:4px">';return;}
   }
-  prev.innerHTML='';
+  var plat=detectarPlataforma(url);
+  var color=COLORES_PLAT[plat];
+  prev.innerHTML='<div style="width:100%;height:60px;border-radius:8px;background:'+color+';display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;margin-bottom:4px">'+ICONOS_PLAT[plat]+'</div>';
 }
 
 async function guardarBiblioteca(){
   var url=document.getElementById('bib-url').value.trim();
   var titulo=document.getElementById('bib-titulo').value.trim();
-  var topico=document.getElementById('bib-topico').value;
+  var topicosSeleccionados=[...document.querySelectorAll('.bib-topico-chip.active')].map(c=>c.dataset.topico);
   if(!url){alert('Ingresá una URL');return;}
-  if(!topico){alert('Elegí un tópico');return;}
-  var plat=detectarPlataforma(url)||'link';
+  if(!topicosSeleccionados.length){alert('Elegí al menos un tópico');return;}
+  var plat=detectarPlataforma(url);
   var ytid=plat==='youtube'?youtubeId(url):null;
   if(!titulo){
     if(plat==='youtube')titulo='Video de YouTube';
@@ -1216,7 +1233,7 @@ async function guardarBiblioteca(){
     else if(plat==='instagram')titulo='Reel de Instagram';
     else titulo=url;
   }
-  var nuevo={url:url,titulo:titulo,topico:topico,plataforma:plat,ts:Date.now()};
+  var nuevo={url:url,titulo:titulo,topicos:topicosSeleccionados,topico:topicosSeleccionados[0],plataforma:plat,ts:Date.now()};
   if(ytid)nuevo.ytid=ytid;
   _bibData.unshift(nuevo);
   try{
@@ -1225,6 +1242,7 @@ async function guardarBiblioteca(){
   }catch(e){alert('Error al guardar');_bibData.shift();return;}
   closeModal();
   renderBiblioteca();
+  renderBibHome();
 }
 
 async function borrarBiblioteca(idx){
@@ -1235,6 +1253,7 @@ async function borrarBiblioteca(idx){
     if(error){alert('Error al borrar');_bibData.splice(idx,0,...removed);return;}
   }catch(e){alert('Error al borrar');_bibData.splice(idx,0,...removed);return;}
   renderBiblioteca();
+  renderBibHome();
 }
 
 const FRASES_PK=["Nada sin Ti, nada sin nosotros.", "Quien quiera conquistar los corazones debe dar a cambio su propio corazón.", "Mi profesión principal, mi deber principal y mi oración principal es amar.", "La santidad de la vida diaria.", "En la humildad, por debajo de todos.", "En el amor, por encima de todos.", "El amor lleva y sobrelleva.", "El amor vence todo.", "La cruz descifra todos los enigmas de la vida.", "La cruz bendice al mundo.", "¡El Padre me ama!", "¡El Padre y yo somos uno!", "Dilexit Ecclesiam.", "María quiere formar personalidades libres y fuertes.", "La única norma suprema es el ideal personal.", "Dios tiene un pensamiento original para cada persona.", "Cada alma es una idea única de Dios.", "Dios no hace copias.", "Descubrir el ideal personal es descubrir la misión.", "La fidelidad al ideal conduce a la plenitud.", "La vocación es la forma concreta del amor de Dios.", "La originalidad es un don y una tarea.", "Sé lo que Dios pensó al crearte.", "La personalidad madura cuando responde a su misión.", "Nada grande se realiza sin sacrificio.", "Héroe es quien se entrega totalmente a una gran misión.", "No nacimos para la mediocridad.", "Dios quiere hombres y mujeres de decisiones.", "El mundo necesita santos heroicos.", "Quien tiene una misión encuentra fuerzas.", "Las grandes tareas exigen corazones grandes.", "El ideal da dirección a la vida.", "Toda misión auténtica nace del amor.", "La fecundidad depende de la entrega.", "Nada ocurre sin permiso de Dios.", "Dios escribe la historia con amor.", "La Providencia habla a través de los acontecimientos.", "Hay que tener el oído en el corazón de Dios y la mano en el pulso del tiempo.", "La confianza es la respuesta adecuada a la Providencia.", "Dios tiene un plan incluso cuando no lo entendemos.", "Todo tiene un sentido en las manos de Dios.", "La historia es el lenguaje de Dios.", "Lo extraordinario realizado de modo ordinario.", "Dios se encuentra en los deberes de cada día.", "El trabajo también puede ser oración.", "La fidelidad en lo pequeño construye grandeza.", "Cada día ofrece oportunidades de santidad.", "La vida cotidiana es el camino normal hacia Dios.", "El amor transforma las tareas comunes.", "La santidad es armonía.", "La vida ordinaria puede ser extraordinariamente fecunda.", "El amor crea comunidad.", "La libertad nace del amor.", "Amar es darse.", "El amor hace crecer a las personas.", "Las personas se forman en vínculos.", "El amor es la gran ley de la vida."];
