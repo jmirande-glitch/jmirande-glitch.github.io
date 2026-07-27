@@ -307,8 +307,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     -->
 
     <div class="card">
-      <div class="card-title"><i class="ti ti-clock" style="color:#E8A020"></i> Liturgia de las Horas</div>
-      <div id="santo-del-dia"><div style="font-size:12px;color:var(--text-secondary)">Cargando...</div></div>
+      <div class="card-title" style="justify-content:space-between">
+        <span><i class="ti ti-player-play" style="color:var(--purple)"></i> Biblioteca</span>
+        <button onclick="goPage('biblioteca',document.querySelector('.nav-item[onclick*=biblioteca]'))" style="background:none;border:0.5px solid var(--border-md);border-radius:6px;cursor:pointer;color:var(--purple);padding:3px 8px;font-size:11px;font-family:inherit">Ver todo →</button>
+      </div>
+      <div id="bib-home-list"></div>
     </div>
     <div class="card">
       <div class="card-title"><i class="ti ti-book" style="color:var(--purple)"></i> Evangelio del día</div>
@@ -443,27 +446,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div id="talleres-list"></div>
     </div>
   </div>
-</div>
 
-<!-- PÁGINA BIBLIOTECA MULTIMEDIA -->
-<div class="page" id="page-biblioteca">
-  <div class="page-header">
-    <div style="font-size:17px;font-weight:600">Biblioteca</div>
-    <button onclick="abrirFormBiblioteca()" style="background:var(--purple);border:none;border-radius:8px;color:#fff;padding:6px 12px;font-size:13px;font-family:inherit;cursor:pointer"><i class="ti ti-plus"></i> Agregar</button>
+  <!-- PÁGINA BIBLIOTECA MULTIMEDIA -->
+  <div class="page" id="page-biblioteca">
+    <div class="page-header">
+      <div style="font-size:17px;font-weight:600">Biblioteca</div>
+      <button onclick="abrirFormBiblioteca()" style="background:var(--purple);border:none;border-radius:8px;color:#fff;padding:6px 12px;font-size:13px;font-family:inherit;cursor:pointer"><i class="ti ti-plus"></i> Agregar</button>
+    </div>
+    <div style="padding:0 12px 6px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none">
+      <button class="bib-filter active" data-topico="Todos" onclick="setBibFilter('Todos',this)">Todos</button>
+      <button class="bib-filter" data-topico="Espiritualidad" onclick="setBibFilter('Espiritualidad',this)">Espiritualidad</button>
+      <button class="bib-filter" data-topico="Formación" onclick="setBibFilter('Formación',this)">Formación</button>
+      <button class="bib-filter" data-topico="Familia" onclick="setBibFilter('Familia',this)">Familia</button>
+      <button class="bib-filter" data-topico="Misión" onclick="setBibFilter('Misión',this)">Misión</button>
+      <button class="bib-filter" data-topico="Schoenstatt" onclick="setBibFilter('Schoenstatt',this)">Schoenstatt</button>
+      <button class="bib-filter" data-topico="Diálogo" onclick="setBibFilter('Diálogo',this)">Diálogo</button>
+      <button class="bib-filter" data-topico="Pareja" onclick="setBibFilter('Pareja',this)">Pareja</button>
+      <button class="bib-filter" data-topico="Crianza" onclick="setBibFilter('Crianza',this)">Crianza</button>
+      <button class="bib-filter" data-topico="Otros" onclick="setBibFilter('Otros',this)">Otros</button>
+    </div>
+    <div id="biblioteca-list" style="padding:0 12px 80px"></div>
   </div>
-  <div style="padding:0 12px 6px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none">
-    <button class="bib-filter active" data-topico="Todos" onclick="setBibFilter('Todos',this)">Todos</button>
-    <button class="bib-filter" data-topico="Espiritualidad" onclick="setBibFilter('Espiritualidad',this)">Espiritualidad</button>
-    <button class="bib-filter" data-topico="Formación" onclick="setBibFilter('Formación',this)">Formación</button>
-    <button class="bib-filter" data-topico="Familia" onclick="setBibFilter('Familia',this)">Familia</button>
-    <button class="bib-filter" data-topico="Misión" onclick="setBibFilter('Misión',this)">Misión</button>
-    <button class="bib-filter" data-topico="Schoenstatt" onclick="setBibFilter('Schoenstatt',this)">Schoenstatt</button>
-    <button class="bib-filter" data-topico="Diálogo" onclick="setBibFilter('Diálogo',this)">Diálogo</button>
-    <button class="bib-filter" data-topico="Pareja" onclick="setBibFilter('Pareja',this)">Pareja</button>
-    <button class="bib-filter" data-topico="Crianza" onclick="setBibFilter('Crianza',this)">Crianza</button>
-    <button class="bib-filter" data-topico="Otros" onclick="setBibFilter('Otros',this)">Otros</button>
-  </div>
-  <div id="biblioteca-list" style="padding:0 12px 80px"></div>
 </div>
 
 <nav class="navbar">
@@ -1088,6 +1091,29 @@ async function cargarBiblioteca(){
     _bibData=data?JSON.parse(data.valor):[];
   }catch(e){_bibData=[];}
   renderBiblioteca();
+  renderBibHome();
+}
+
+function renderBibHome(){
+  var el=document.getElementById('bib-home-list');
+  if(!el)return;
+  if(!_bibData.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--text-secondary)">Todavía no hay contenido en la biblioteca.</div>';
+    return;
+  }
+  var ultimos=_bibData.slice(0,3);
+  el.innerHTML=ultimos.map(function(item){
+    var thumb=thumbUrl(item);
+    var thumbHTML=thumb
+      ?'<img class="bib-thumb" src="'+thumb+'" referrerpolicy="no-referrer" style="width:56px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0">'
+      :'<div style="width:56px;height:36px;border-radius:6px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">'+iconoPlataforma(item.plataforma)+'</div>';
+    return '<a href="'+item.url+'" target="_blank" style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);text-decoration:none">'
+      +thumbHTML
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:11px;color:var(--purple);font-weight:500">'+item.topico+'</div>'
+      +'<div style="font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+item.titulo+'</div>'
+      +'</div></a>';
+  }).join('')+'<div style="border-bottom:none"></div>';
 }
 
 function setBibFilter(topico,btn){
@@ -1259,7 +1285,7 @@ async function checkLogin(){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('main-app').style.display='block';
     if(errEl)errEl.style.display='none';
-    loadAll();subscribeRealtime();loadSantoYEvangelio();loadIntenciones();loadClima();
+    loadAll();subscribeRealtime();loadSantoYEvangelio();loadIntenciones();loadClima();cargarBiblioteca();
   } else {
     if(errEl)errEl.style.display='block';
     document.getElementById('login-code').value='';
