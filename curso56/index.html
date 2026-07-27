@@ -159,6 +159,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bday-box span{font-size:13px;color:var(--purple-text)}
 .bib-filter{flex-shrink:0;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;font-family:inherit;cursor:pointer}
 .bib-filter.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.bib-topico-chip{padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer}
 .bib-topico-chip.active{background:var(--purple);color:#fff;border-color:var(--purple)}
 .bib-card{display:flex;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);align-items:flex-start}
 .bib-card:last-child{border-bottom:none}
@@ -717,22 +718,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <!-- MODAL BIBLIOTECA -->
   <div class="modal-sheet" id="modal-biblioteca" style="display:none">
-    <div class="modal-header">Agregar contenido <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <div class="modal-header"><span id="modal-biblioteca-title">Agregar contenido</span> <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <input type="hidden" id="modal-biblioteca-idx" value="">
     <div style="padding:0 0 8px">
       <input type="url" id="bib-url" placeholder="URL (YouTube, Spotify, Instagram…)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:8px" oninput="onBibUrlChange()">
       <div id="bib-preview" style="margin-bottom:8px"></div>
       <input type="text" id="bib-titulo" placeholder="Título (opcional, se detecta automático)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:10px">
-      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">Tópicos (podés elegir más de uno)</div>
+      <div style="font-size:11px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">Tópicos</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
-        <button class="bib-topico-chip" data-topico="Espiritualidad" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Espiritualidad</button>
-        <button class="bib-topico-chip" data-topico="Formación" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Formación</button>
-        <button class="bib-topico-chip" data-topico="Familia" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Familia</button>
-        <button class="bib-topico-chip" data-topico="Misión" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Misión</button>
-        <button class="bib-topico-chip" data-topico="Schoenstatt" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Schoenstatt</button>
-        <button class="bib-topico-chip" data-topico="Diálogo" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Diálogo</button>
-        <button class="bib-topico-chip" data-topico="Pareja" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Pareja</button>
-        <button class="bib-topico-chip" data-topico="Crianza" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Crianza</button>
-        <button class="bib-topico-chip" data-topico="Otros" onclick="this.classList.toggle('active')" style="padding:6px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:13px;font-family:inherit;cursor:pointer">Otros</button>
+        <button class="bib-topico-chip" data-topico="Espiritualidad" onclick="this.classList.toggle('active')">Espiritualidad</button>
+        <button class="bib-topico-chip" data-topico="Formación" onclick="this.classList.toggle('active')">Formación</button>
+        <button class="bib-topico-chip" data-topico="Familia" onclick="this.classList.toggle('active')">Familia</button>
+        <button class="bib-topico-chip" data-topico="Misión" onclick="this.classList.toggle('active')">Misión</button>
+        <button class="bib-topico-chip" data-topico="Schoenstatt" onclick="this.classList.toggle('active')">Schoenstatt</button>
+        <button class="bib-topico-chip" data-topico="Diálogo" onclick="this.classList.toggle('active')">Diálogo</button>
+        <button class="bib-topico-chip" data-topico="Pareja" onclick="this.classList.toggle('active')">Pareja</button>
+        <button class="bib-topico-chip" data-topico="Crianza" onclick="this.classList.toggle('active')">Crianza</button>
+        <button class="bib-topico-chip" data-topico="Otros" onclick="this.classList.toggle('active')">Otros</button>
       </div>
       <button onclick="guardarBiblioteca()" style="width:100%;padding:10px;background:var(--purple);color:#fff;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit"><i class="ti ti-device-floppy"></i> Guardar</button>
     </div>
@@ -1112,15 +1114,19 @@ function renderBibHome(){
   }
   el.innerHTML=_bibData.slice(0,3).map(function(item){
     var thumb=thumbUrl(item);
-    var topicos=Array.isArray(item.topicos)?item.topicos.join(', '):(item.topico||'');
+    var topicos=Array.isArray(item.topicos)?item.topicos:(item.topico?[item.topico]:[]);
+    var color=COLORES_PLAT[item.plataforma||'link'];
     var thumbHTML=thumb
       ?'<img src="'+thumb+'" referrerpolicy="no-referrer" style="width:64px;height:42px;border-radius:7px;object-fit:cover;flex-shrink:0">'
-      :'<div style="width:64px;height:42px;border-radius:7px;flex-shrink:0;background:'+COLORES_PLAT[item.plataforma||'link']+';display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff">'+ICONOS_PLAT[item.plataforma||'link']+'</div>';
+      :'<div style="width:64px;height:42px;border-radius:7px;flex-shrink:0;background:'+color+';display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff">'+ICONOS_PLAT[item.plataforma||'link']+'</div>';
+    var chips=topicos.map(function(t){
+      return '<span style="font-size:10px;font-weight:600;background:var(--purple-light);color:var(--purple);border-radius:10px;padding:2px 7px">'+t+'</span>';
+    }).join(' ');
     return '<a href="'+item.url+'" target="_blank" style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);text-decoration:none">'
       +thumbHTML
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:10px;color:var(--purple);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">'+topicos+'</div>'
-      +'<div style="font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.titulo+'</div>'
+      +'<div style="font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px">'+item.titulo+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:4px">'+chips+'</div>'
       +'</div></a>';
   }).join('');
 }
@@ -1193,8 +1199,10 @@ function renderBiblioteca(){
       +'<a href="'+item.url+'" target="_blank" style="text-decoration:none"><div style="font-size:14px;font-weight:600;color:var(--text-primary);line-height:1.35;margin-bottom:6px">'+item.titulo+'</div></a>'
       +'<div style="display:flex;align-items:center;justify-content:space-between">'
       +'<span style="font-size:11px;color:var(--text-secondary);font-weight:500">'+item.plataforma.charAt(0).toUpperCase()+item.plataforma.slice(1)+'</span>'
+      +'<div style="display:flex;gap:8px">'
+      +'<button onclick="abrirEditarBiblioteca('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--purple);padding:2px"><i class="ti ti-pencil" style="font-size:13px"></i></button>'
       +'<button onclick="borrarBiblioteca('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--red);padding:2px"><i class="ti ti-trash" style="font-size:13px"></i></button>'
-      +'</div></div></div>';
+      +'</div></div></div></div>';
   }).join('');
 }
 
@@ -1202,8 +1210,28 @@ function abrirFormBiblioteca(){
   document.getElementById('bib-url').value='';
   document.getElementById('bib-titulo').value='';
   document.getElementById('bib-preview').innerHTML='';
-  // Resetear chips de tópicos
   document.querySelectorAll('.bib-topico-chip').forEach(c=>c.classList.remove('active'));
+  document.getElementById('modal-biblioteca-title').textContent='Agregar contenido';
+  document.getElementById('modal-biblioteca-idx').value='';
+  openModal('modal-biblioteca');
+}
+
+var _bibEditIdx=null;
+function abrirEditarBiblioteca(idx){
+  var item=_bibData[idx];
+  if(!item)return;
+  _bibEditIdx=idx;
+  document.getElementById('bib-url').value=item.url||'';
+  document.getElementById('bib-titulo').value=item.titulo||'';
+  document.getElementById('bib-preview').innerHTML='';
+  document.getElementById('modal-biblioteca-title').textContent='Editar contenido';
+  document.getElementById('modal-biblioteca-idx').value=idx;
+  // Activar chips según tópicos guardados
+  var tops=Array.isArray(item.topicos)?item.topicos:(item.topico?[item.topico]:[]);
+  document.querySelectorAll('.bib-topico-chip').forEach(function(c){
+    c.classList.toggle('active',tops.indexOf(c.dataset.topico)>=0);
+  });
+  onBibUrlChange();
   openModal('modal-biblioteca');
 }
 
@@ -1233,13 +1261,23 @@ async function guardarBiblioteca(){
     else if(plat==='instagram')titulo='Reel de Instagram';
     else titulo=url;
   }
-  var nuevo={url:url,titulo:titulo,topicos:topicosSeleccionados,topico:topicosSeleccionados[0],plataforma:plat,ts:Date.now()};
-  if(ytid)nuevo.ytid=ytid;
-  _bibData.unshift(nuevo);
+  var idxStr=document.getElementById('modal-biblioteca-idx').value;
+  var isEdit=idxStr!=='';
+  var idx=parseInt(idxStr);
+  if(isEdit){
+    // Editar existente — preservar ts original
+    var original=_bibData[idx];
+    _bibData[idx]=Object.assign({},original,{url:url,titulo:titulo,topicos:topicosSeleccionados,topico:topicosSeleccionados[0],plataforma:plat});
+    if(ytid)_bibData[idx].ytid=ytid;
+  } else {
+    var nuevo={url:url,titulo:titulo,topicos:topicosSeleccionados,topico:topicosSeleccionados[0],plataforma:plat,ts:Date.now()};
+    if(ytid)nuevo.ytid=ytid;
+    _bibData.unshift(nuevo);
+  }
   try{
     var {error}=await sb.from('config').upsert({clave:'biblioteca_multimedia',valor:JSON.stringify(_bibData)},{onConflict:'clave'});
-    if(error){alert('Error al guardar');_bibData.shift();return;}
-  }catch(e){alert('Error al guardar');_bibData.shift();return;}
+    if(error){alert('Error al guardar');if(!isEdit)_bibData.shift();return;}
+  }catch(e){alert('Error al guardar');if(!isEdit)_bibData.shift();return;}
   closeModal();
   renderBiblioteca();
   renderBibHome();
@@ -1378,7 +1416,13 @@ async function loadAll(){
       if(iData)state.intenciones=iData.valor||'';
     }catch(e){console.log('config load:',e);}
     setSyncStatus('ok');
+    // Cargar biblioteca junto con el resto para que el home siempre muestre datos
+    try{
+      const {data:bibData}=await sb.from('config').select('valor').eq('clave','biblioteca_multimedia').single();
+      _bibData=bibData?JSON.parse(bibData.valor):[];
+    }catch(e){if(!_bibData.length)_bibData=[];}
     renderAll();
+    renderBibHome();
   }catch(e){
     setSyncStatus('error');
     console.error(e);
