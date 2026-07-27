@@ -451,11 +451,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
   <!-- PÁGINA BIBLIOTECA MULTIMEDIA -->
   <div class="page" id="page-biblioteca">
-    <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-size:17px;font-weight:600">Biblioteca</div>
-      <button onclick="abrirFormBiblioteca()" style="background:var(--purple);border:none;border-radius:8px;color:#fff;padding:6px 12px;font-size:13px;font-family:inherit;cursor:pointer"><i class="ti ti-plus"></i> Agregar</button>
+      <button onclick="abrirFormBiblioteca()" style="background:var(--purple);border:none;border-radius:8px;color:#fff;padding:7px 14px;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap"><i class="ti ti-plus"></i> Agregar</button>
     </div>
-    <div style="padding:0 12px 6px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none">
+    <div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px 12px">
       <button class="bib-filter active" data-topico="Todos" onclick="setBibFilter('Todos',this)">Todos</button>
       <button class="bib-filter" data-topico="Espiritualidad" onclick="setBibFilter('Espiritualidad',this)">Espiritualidad</button>
       <button class="bib-filter" data-topico="Formación" onclick="setBibFilter('Formación',this)">Formación</button>
