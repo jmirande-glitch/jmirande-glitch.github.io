@@ -157,6 +157,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bday-box{display:flex;align-items:center;gap:8px;background:var(--purple-light);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:8px}
 .bday-box i{color:var(--purple);font-size:18px}
 .bday-box span{font-size:13px;color:var(--purple-text)}
+.bib-filter{flex-shrink:0;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border-md);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;font-family:inherit;cursor:pointer}
+.bib-filter.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.bib-card{display:flex;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);align-items:flex-start}
+.bib-card:last-child{border-bottom:none}
+.bib-thumb{width:80px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--bg-secondary)}
+.bib-thumb-placeholder{width:80px;height:52px;border-radius:8px;flex-shrink:0;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:24px}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal-sheet{background:var(--bg-primary);border-radius:20px 20px 0 0;padding:20px 16px 36px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
@@ -439,6 +445,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- PÁGINA BIBLIOTECA MULTIMEDIA -->
+<div class="page" id="page-biblioteca">
+  <div class="page-header">
+    <div style="font-size:17px;font-weight:600">Biblioteca</div>
+    <button onclick="abrirFormBiblioteca()" style="background:var(--purple);border:none;border-radius:8px;color:#fff;padding:6px 12px;font-size:13px;font-family:inherit;cursor:pointer"><i class="ti ti-plus"></i> Agregar</button>
+  </div>
+  <div style="padding:0 12px 6px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none">
+    <button class="bib-filter active" data-topico="Todos" onclick="setBibFilter('Todos',this)">Todos</button>
+    <button class="bib-filter" data-topico="Espiritualidad" onclick="setBibFilter('Espiritualidad',this)">Espiritualidad</button>
+    <button class="bib-filter" data-topico="Formación" onclick="setBibFilter('Formación',this)">Formación</button>
+    <button class="bib-filter" data-topico="Familia" onclick="setBibFilter('Familia',this)">Familia</button>
+    <button class="bib-filter" data-topico="Misión" onclick="setBibFilter('Misión',this)">Misión</button>
+    <button class="bib-filter" data-topico="Schoenstatt" onclick="setBibFilter('Schoenstatt',this)">Schoenstatt</button>
+    <button class="bib-filter" data-topico="Diálogo" onclick="setBibFilter('Diálogo',this)">Diálogo</button>
+    <button class="bib-filter" data-topico="Pareja" onclick="setBibFilter('Pareja',this)">Pareja</button>
+    <button class="bib-filter" data-topico="Crianza" onclick="setBibFilter('Crianza',this)">Crianza</button>
+    <button class="bib-filter" data-topico="Otros" onclick="setBibFilter('Otros',this)">Otros</button>
+  </div>
+  <div id="biblioteca-list" style="padding:0 12px 80px"></div>
+</div>
+
 <nav class="navbar">
   <button class="nav-item active" onclick="goPage('home',this)"><i class="ti ti-home"></i><span>Inicio</span></button>
   <button class="nav-item" onclick="goPage('cal',this)"><i class="ti ti-calendar"></i><span>Reuniones</span></button>
@@ -447,6 +474,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="nav-item" onclick="goPage('galeria',this)"><i class="ti ti-photo"></i><span>Fotos</span></button>
   <button class="nav-item" data-page="conquistas" onclick="goPage('conquistas',this)"><i class="ti ti-shield-star"></i><span>Conquistas</span></button>
   <button class="nav-item" onclick="goPage('material',this)"><i class="ti ti-book"></i><span>Material</span></button>
+  <button class="nav-item" onclick="goPage('biblioteca',this)"><i class="ti ti-player-play"></i><span>Biblioteca</span></button>
 </nav>
 
 <!-- MODALES -->
@@ -681,6 +709,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="modal-sheet" id="modal-cuentas" style="display:none">
     <div class="modal-header">Cuentas <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
     <div id="cuentas-body" style="padding:12px 16px"></div>
+  </div>
+
+  <!-- MODAL BIBLIOTECA -->
+  <div class="modal-sheet" id="modal-biblioteca" style="display:none">
+    <div class="modal-header">Agregar contenido <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:var(--text-secondary)"><i class="ti ti-x" style="font-size:20px"></i></button></div>
+    <div style="padding:0 0 8px">
+      <input type="url" id="bib-url" placeholder="URL (YouTube, Spotify, Instagram…)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:8px" oninput="onBibUrlChange()">
+      <div id="bib-preview" style="margin-bottom:8px"></div>
+      <input type="text" id="bib-titulo" placeholder="Título (opcional, se detecta automático)" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:8px">
+      <select id="bib-topico" style="width:100%;padding:10px 12px;border:0.5px solid var(--border-md);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:12px">
+        <option value="">Elegí un tópico</option>
+        <option>Espiritualidad</option><option>Formación</option><option>Familia</option>
+        <option>Misión</option><option>Schoenstatt</option><option>Diálogo</option>
+        <option>Pareja</option><option>Crianza</option><option>Otros</option>
+      </select>
+      <button onclick="guardarBiblioteca()" style="width:100%;padding:10px;background:var(--purple);color:#fff;border:none;border-radius:var(--radius-md);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit"><i class="ti ti-device-floppy"></i> Guardar</button>
+    </div>
   </div>
 
   <div class="modal-sheet" id="modal-editar-reunion" style="display:none">
@@ -1032,6 +1077,140 @@ async function borrarGasto(idx){
   renderCuentas();
 }
 
+// ---- BIBLIOTECA MULTIMEDIA ----
+var _bibData=[];
+var _bibFiltro='Todos';
+var TOPICOS_BIB=['Espiritualidad','Formación','Familia','Misión','Schoenstatt','Diálogo','Pareja','Crianza','Otros'];
+
+async function cargarBiblioteca(){
+  try{
+    const {data}=await sb.from('config').select('valor').eq('clave','biblioteca_multimedia').single();
+    _bibData=data?JSON.parse(data.valor):[];
+  }catch(e){_bibData=[];}
+  renderBiblioteca();
+}
+
+function setBibFilter(topico,btn){
+  _bibFiltro=topico;
+  document.querySelectorAll('.bib-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBiblioteca();
+}
+
+function detectarPlataforma(url){
+  if(!url)return null;
+  if(/youtube\.com|youtu\.be/.test(url))return 'youtube';
+  if(/spotify\.com/.test(url))return 'spotify';
+  if(/instagram\.com/.test(url))return 'instagram';
+  return 'link';
+}
+
+function youtubeId(url){
+  var m=url.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+
+function thumbUrl(item){
+  if(item.plataforma==='youtube'&&item.ytid){
+    return 'https://img.youtube.com/vi/'+item.ytid+'/mqdefault.jpg';
+  }
+  return null;
+}
+
+function iconoPlataforma(plat){
+  if(plat==='youtube')return '▶️';
+  if(plat==='spotify')return '🎵';
+  if(plat==='instagram')return '📸';
+  return '🔗';
+}
+
+function renderBiblioteca(){
+  var el=document.getElementById('biblioteca-list');
+  if(!el)return;
+  var items=_bibFiltro==='Todos'?_bibData:_bibData.filter(function(i){return i.topico===_bibFiltro;});
+  if(!items.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--text-secondary);font-size:13px">'
+      +(_bibData.length?'Sin contenido para este tópico':'Todavía no hay contenido. ¡Agregá el primero!')
+      +'</div>';
+    return;
+  }
+  el.innerHTML=items.map(function(item,i){
+    var idx=_bibData.indexOf(item);
+    var thumb=thumbUrl(item);
+    var thumbHTML=thumb
+      ?'<img class="bib-thumb" src="'+thumb+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+       +'<div class="bib-thumb-placeholder" style="display:none">'+iconoPlataforma(item.plataforma)+'</div>'
+      :'<div class="bib-thumb-placeholder">'+iconoPlataforma(item.plataforma)+'</div>';
+    return '<div class="bib-card">'
+      +'<a href="'+item.url+'" target="_blank" style="text-decoration:none;display:flex;gap:12px;flex:1;min-width:0">'
+      +thumbHTML
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:11px;font-weight:500;color:var(--purple);text-transform:uppercase;margin-bottom:2px">'+item.topico+'</div>'
+      +'<div style="font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+item.titulo+'</div>'
+      +'<div style="font-size:11px;color:var(--text-secondary);margin-top:3px">'+iconoPlataforma(item.plataforma)+' '+item.plataforma.charAt(0).toUpperCase()+item.plataforma.slice(1)+'</div>'
+      +'</div></a>'
+      +'<button onclick="borrarBiblioteca('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--red);padding:4px;align-self:flex-start"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      +'</div>';
+  }).join('');
+}
+
+function abrirFormBiblioteca(){
+  document.getElementById('bib-url').value='';
+  document.getElementById('bib-titulo').value='';
+  document.getElementById('bib-topico').value='';
+  document.getElementById('bib-preview').innerHTML='';
+  openModal('modal-biblioteca');
+}
+
+function onBibUrlChange(){
+  var url=document.getElementById('bib-url').value.trim();
+  var prev=document.getElementById('bib-preview');
+  var plat=detectarPlataforma(url);
+  if(plat==='youtube'){
+    var vid=youtubeId(url);
+    if(vid){
+      prev.innerHTML='<img src="https://img.youtube.com/vi/'+vid+'/mqdefault.jpg" referrerpolicy="no-referrer" style="width:100%;border-radius:8px;max-height:120px;object-fit:cover">';
+      return;
+    }
+  }
+  prev.innerHTML='';
+}
+
+async function guardarBiblioteca(){
+  var url=document.getElementById('bib-url').value.trim();
+  var titulo=document.getElementById('bib-titulo').value.trim();
+  var topico=document.getElementById('bib-topico').value;
+  if(!url){alert('Ingresá una URL');return;}
+  if(!topico){alert('Elegí un tópico');return;}
+  var plat=detectarPlataforma(url)||'link';
+  var ytid=plat==='youtube'?youtubeId(url):null;
+  if(!titulo){
+    if(plat==='youtube')titulo='Video de YouTube';
+    else if(plat==='spotify')titulo='Podcast de Spotify';
+    else if(plat==='instagram')titulo='Reel de Instagram';
+    else titulo=url;
+  }
+  var nuevo={url:url,titulo:titulo,topico:topico,plataforma:plat,ts:Date.now()};
+  if(ytid)nuevo.ytid=ytid;
+  _bibData.unshift(nuevo);
+  try{
+    var {error}=await sb.from('config').upsert({clave:'biblioteca_multimedia',valor:JSON.stringify(_bibData)},{onConflict:'clave'});
+    if(error){alert('Error al guardar');_bibData.shift();return;}
+  }catch(e){alert('Error al guardar');_bibData.shift();return;}
+  closeModal();
+  renderBiblioteca();
+}
+
+async function borrarBiblioteca(idx){
+  if(!confirm('¿Eliminar este contenido?'))return;
+  var removed=_bibData.splice(idx,1);
+  try{
+    var {error}=await sb.from('config').upsert({clave:'biblioteca_multimedia',valor:JSON.stringify(_bibData)},{onConflict:'clave'});
+    if(error){alert('Error al borrar');_bibData.splice(idx,0,...removed);return;}
+  }catch(e){alert('Error al borrar');_bibData.splice(idx,0,...removed);return;}
+  renderBiblioteca();
+}
+
 const FRASES_PK=["Nada sin Ti, nada sin nosotros.", "Quien quiera conquistar los corazones debe dar a cambio su propio corazón.", "Mi profesión principal, mi deber principal y mi oración principal es amar.", "La santidad de la vida diaria.", "En la humildad, por debajo de todos.", "En el amor, por encima de todos.", "El amor lleva y sobrelleva.", "El amor vence todo.", "La cruz descifra todos los enigmas de la vida.", "La cruz bendice al mundo.", "¡El Padre me ama!", "¡El Padre y yo somos uno!", "Dilexit Ecclesiam.", "María quiere formar personalidades libres y fuertes.", "La única norma suprema es el ideal personal.", "Dios tiene un pensamiento original para cada persona.", "Cada alma es una idea única de Dios.", "Dios no hace copias.", "Descubrir el ideal personal es descubrir la misión.", "La fidelidad al ideal conduce a la plenitud.", "La vocación es la forma concreta del amor de Dios.", "La originalidad es un don y una tarea.", "Sé lo que Dios pensó al crearte.", "La personalidad madura cuando responde a su misión.", "Nada grande se realiza sin sacrificio.", "Héroe es quien se entrega totalmente a una gran misión.", "No nacimos para la mediocridad.", "Dios quiere hombres y mujeres de decisiones.", "El mundo necesita santos heroicos.", "Quien tiene una misión encuentra fuerzas.", "Las grandes tareas exigen corazones grandes.", "El ideal da dirección a la vida.", "Toda misión auténtica nace del amor.", "La fecundidad depende de la entrega.", "Nada ocurre sin permiso de Dios.", "Dios escribe la historia con amor.", "La Providencia habla a través de los acontecimientos.", "Hay que tener el oído en el corazón de Dios y la mano en el pulso del tiempo.", "La confianza es la respuesta adecuada a la Providencia.", "Dios tiene un plan incluso cuando no lo entendemos.", "Todo tiene un sentido en las manos de Dios.", "La historia es el lenguaje de Dios.", "Lo extraordinario realizado de modo ordinario.", "Dios se encuentra en los deberes de cada día.", "El trabajo también puede ser oración.", "La fidelidad en lo pequeño construye grandeza.", "Cada día ofrece oportunidades de santidad.", "La vida cotidiana es el camino normal hacia Dios.", "El amor transforma las tareas comunes.", "La santidad es armonía.", "La vida ordinaria puede ser extraordinariamente fecunda.", "El amor crea comunidad.", "La libertad nace del amor.", "Amar es darse.", "El amor hace crecer a las personas.", "Las personas se forman en vínculos.", "El amor es la gran ley de la vida."];
 
 function getFrasePK(){
@@ -1219,6 +1398,7 @@ function goPage(id,el){
   document.getElementById('page-'+id).classList.add('active');
   el.classList.add('active');
   window.scrollTo({top:0,behavior:'instant'});
+  if(id==='biblioteca')cargarBiblioteca();
 }
 
 function openModal(id){
