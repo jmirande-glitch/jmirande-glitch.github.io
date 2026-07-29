@@ -2256,12 +2256,19 @@ async function subirFotosLote(){
     album=document.getElementById('sf-album-custom').value.trim()||document.getElementById('sf-album-reunion').value||'';
     if(!album){alert('Elegí una reunión o escribí el nombre del álbum');return;}
   }
+  // Releer archivos del input por si _fotosArchivos se limpió
+  const inputEl=document.getElementById('sf-files');
+  if(!_fotosArchivos.length&&inputEl&&inputEl.files&&inputEl.files.length){
+    _fotosArchivos=Array.from(inputEl.files);
+  }
   if(!_fotosArchivos.length){alert('Elegí al menos una foto');return;}
   const status=document.getElementById('sf-status');
   status.style.display='block';
+  status.textContent='Iniciando subida de '+_fotosArchivos.length+' foto(s)...';
   let subidas=0;
+  let errores=0;
   for(const file of _fotosArchivos){
-    status.textContent='Subiendo '+( subidas+1)+'/'+_fotosArchivos.length+'...';
+    status.textContent='Subiendo '+(subidas+errores+1)+'/'+_fotosArchivos.length+'...';
     await new Promise(resolve=>{
       compressForUpload(file,1200,0.8,async blob=>{
         const nombre=Date.now()+'_'+Math.random().toString(36).slice(2)+'.jpg';
@@ -2270,21 +2277,30 @@ async function subirFotosLote(){
         if(!error){
           const {data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
           const {error:insErr}=await sb.from('fotos').insert({link:urlData.publicUrl,descripcion:album});
-          if(insErr)console.error('Error insertando foto:',insErr);
-          else subidas++;
+          if(insErr){
+            console.error('Error insertando foto en tabla:',insErr);
+            errores++;
+          } else {
+            subidas++;
+          }
         } else {
           console.error('Error subiendo al storage:',error);
+          errores++;
         }
         resolve();
       });
     });
   }
-  status.textContent='✓ '+subidas+' fotos subidas';
+  if(errores>0){
+    status.textContent='⚠️ '+subidas+' subidas, '+errores+' con error. Ver consola.';
+  } else {
+    status.textContent='✓ '+subidas+' foto'+(subidas!==1?'s':'')+' subida'+(subidas!==1?'s':'');
+  }
   _fotosArchivos=[];
   document.getElementById('sf-files').value='';
   document.getElementById('sf-preview').innerHTML='';
   await loadAll();
-  setTimeout(()=>{status.style.display='none';closeModal();},1500);
+  setTimeout(()=>{status.style.display='none';closeModal();},2000);
 }
 
 async function renderGaleria(){
