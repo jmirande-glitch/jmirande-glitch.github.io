@@ -2256,7 +2256,8 @@ async function subirFotosLote(){
     album=document.getElementById('sf-album-custom').value.trim()||document.getElementById('sf-album-reunion').value||'';
     if(!album){alert('Elegí una reunión o escribí el nombre del álbum');return;}
   }
-  // Releer archivos del input por si _fotosArchivos se limpió
+  // Sanitizar para el path del storage: reemplazar espacios y caracteres especiales
+  const albumPath=album.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ñ/gi,'n').replace(/ü/gi,'u').replace(/[^a-zA-Z0-9_\-]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
   const inputEl=document.getElementById('sf-files');
   if(!_fotosArchivos.length&&inputEl&&inputEl.files&&inputEl.files.length){
     _fotosArchivos=Array.from(inputEl.files);
@@ -2272,7 +2273,7 @@ async function subirFotosLote(){
     await new Promise(resolve=>{
       compressForUpload(file,1200,0.8,async blob=>{
         const nombre=Date.now()+'_'+Math.random().toString(36).slice(2)+'.jpg';
-        const path='galeria/'+album+'/'+nombre;
+        const path='galeria/'+albumPath+'/'+nombre;
         const {data,error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
         if(!error){
           const {data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
