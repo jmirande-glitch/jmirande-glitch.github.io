@@ -2269,8 +2269,11 @@ async function subirFotosLote(){
         const {data,error}=await sb.storage.from('fotos').upload(path,blob,{upsert:true,contentType:'image/jpeg'});
         if(!error){
           const {data:urlData}=sb.storage.from('fotos').getPublicUrl(path);
-          await sb.from('fotos').insert({id:Date.now()+subidas,link:urlData.publicUrl,descripcion:album});
-          subidas++;
+          const {error:insErr}=await sb.from('fotos').insert({link:urlData.publicUrl,descripcion:album});
+          if(insErr)console.error('Error insertando foto:',insErr);
+          else subidas++;
+        } else {
+          console.error('Error subiendo al storage:',error);
         }
         resolve();
       });
