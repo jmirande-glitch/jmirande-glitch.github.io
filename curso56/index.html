@@ -1596,10 +1596,11 @@ function closeModalOutside(e){if(e.target.id==='modal-overlay')closeModal();}
 // ---- HELPERS ----
 function calcEdad(nacStr){
   if(!nacStr)return null;
-  const hoy=new Date(),nac=new Date(nacStr);
-  let edad=hoy.getFullYear()-nac.getFullYear();
-  const m=hoy.getMonth()-nac.getMonth();
-  if(m<0||(m===0&&hoy.getDate()<nac.getDate()))edad--;
+  const hoy=new Date();
+  const[y,m,d]=nacStr.split('-').map(Number);
+  let edad=hoy.getFullYear()-y;
+  const dm=hoy.getMonth()+1-m;
+  if(dm<0||(dm===0&&hoy.getDate()<d))edad--;
   return edad;
 }
 function formatFecha(str){
